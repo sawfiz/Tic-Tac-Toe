@@ -5,6 +5,10 @@
 const boardEl = document.querySelector('.board');
 const boardSize = 3;
 
+function delay(time) {
+  return new Promise((resolve) => setTimeout(resolve, time));
+}
+
 // Player objects
 const Player = (name, piece) => {
   let turn = false;
@@ -88,12 +92,12 @@ const gameController = (() => {
       const index = squaresEls.indexOf(squareEl);
       const row = Math.floor(index / 3);
       const col = index % 3;
-      squareEl.addEventListener('click', () => {
+      squareEl.addEventListener('click', async () => {
         gameBoard.addToBoard(currentPlayer.piece, row, col, squareEl);
         // Disable the square once it has been clicked
         squareEl.style.pointerEvents = 'none';
         plays += 1;
-
+        await delay(100); // Wait a bit for display to finish update
         if (gameBoard.gotWinner(currentPlayer, row, col)) {
           alert(`${currentPlayer.name} won!`);
         } else if (plays >= boardSize * boardSize) {
