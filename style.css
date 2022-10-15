@@ -12,35 +12,80 @@ body {
     justify-content: space-between;
     align-items: center;
 }
+
+h1 {
+    /* grid-area: head; */
+}
+
 .board-container {
     width: 1200px;
     height: 675px;
     background-image: url("images/tic-tact-toe-board\ Medium.jpeg");
     background-size: cover;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    /* border: 1px solid red; */
 }
+
+.player-container, .player-container {
+    /* width: 20%; */
+    flex: 1;
+    height: 60%;
+    /* border: 1px solid red; */
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    color: white;
+    /* border: 1px solid red; */
+    margin: 30px;
+}
+
+.player {
+    width: 80%;
+    text-align: center;
+    font-size: 3rem;
+}
+
+#player1.turn {
+    color: yellow;
+}
+#player2.turn {
+    color: yellow;
+}
+
+
 .board {
-    width: 60%;
+    /* border: 1px solid red; */
+    /* width: 60%; */
+    flex: 3;
     height: 90%;
     display: grid;
     grid-template-columns: 1fr 1.1fr 1fr;
     grid-template-rows: 1fr 1fr 1.2fr;
     gap: 20px;
-    text-align: center;
+    /* border: 1px solid red; */
 }
 
 .square {
-    width: 80%;
-    height: 80%;
+    width: 100%;
+    height: 100%;
     background-size:cover;
     background: center center;
     display: flex;
     align-self: center;
     justify-self: center;
+    justify-content: center;
+    align-items: center;
 }
 .square:hover {
     cursor: pointer;
     background: #333;
+}
+
+.piece{
+    width: 60%;
+}
+
+footer {
+    color: red;
 }

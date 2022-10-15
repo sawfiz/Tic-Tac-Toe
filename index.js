@@ -6,15 +6,12 @@ const boardEl = document.querySelector('.board');
 const boardSize = 3;
 
 function delay(time) {
+  // eslint-disable-next-line no-promise-executor-return
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
 // Player objects
-const Player = (name, piece) => {
-  let turn = false;
-
-  return { turn, name, piece };
-};
+const Player = (name, piece) => ({ name, piece });
 
 const player1 = Player('Player 1', 'X');
 const player2 = Player('Player 2', 'O');
@@ -31,7 +28,7 @@ const gameBoard = (() => {
       ['', '', ''],
     ];
 
-    console.log('Intiialize', JSON.parse(JSON.stringify(board)));
+    // console.log('Intiialize', JSON.parse(JSON.stringify(board)));
 
     // Empty the board display
     boardEl.innerHTML = '';
@@ -46,12 +43,10 @@ const gameBoard = (() => {
 
   function addToBoard(piece, row, col, squareEl) {
     board[row][col] = piece;
-    console.log('After add', JSON.parse(JSON.stringify(board)));
-    if (piece === 'X') {
-      squareEl.style.backgroundImage = "url('images/X.png')";
-    } else {
-      squareEl.style.backgroundImage = "url('images/O.png')";
-    }
+    const pieceEl = document.createElement('img');
+    pieceEl.src = piece === 'X' ? 'images/X.png' : 'images/O.png';
+    pieceEl.classList.add('piece');
+    squareEl.appendChild(pieceEl);
   }
 
   function gotWinner(player, row, col) {
@@ -66,6 +61,7 @@ const gameBoard = (() => {
       if (board[i][i] === player.piece) diag1++;
       if (board[i][boardSize - i - 1] === player.piece) diag2++;
     }
+
     if (
       cols === boardSize ||
       rows === boardSize ||
@@ -83,11 +79,17 @@ const gameBoard = (() => {
 // gameController object using module
 const gameController = (() => {
   let currentPlayer = player1;
-  player1.turn = true;
   let plays = 0;
 
   function trackInput() {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
+    const player1El = document.querySelector('#player1');
+    const player2El = document.querySelector('#player2');
+    if (currentPlayer === player1) {
+      player1El.classList.add('turn');
+    } else {
+      player2El.classList.add('turn');
+    }
     squaresEls.forEach((squareEl) => {
       const index = squaresEls.indexOf(squareEl);
       const row = Math.floor(index / 3);
@@ -105,6 +107,13 @@ const gameController = (() => {
         } else {
           // Swap player turn
           currentPlayer = currentPlayer === player1 ? player2 : player1;
+          if (currentPlayer === player1) {
+            player1El.classList.add('turn');
+            player2El.classList.remove('turn');
+        } else {
+            player2El.classList.add('turn');
+            player1El.classList.remove('turn');
+          }
         }
       });
     });
