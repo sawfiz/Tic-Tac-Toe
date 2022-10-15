@@ -2,5 +2,45 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  border: 1px solid red;
+  /* border: 1px solid red; */
+}
+
+body {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+.board-container {
+    width: 1200px;
+    height: 675px;
+    background-image: url("images/tic-tact-toe-board\ Medium.jpeg");
+    background-size: cover;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.board {
+    width: 60%;
+    height: 90%;
+    display: grid;
+    grid-template-columns: 1fr 1.1fr 1fr;
+    grid-template-rows: 1fr 1fr 1.2fr;
+    gap: 20px;
+    text-align: center;
+}
+
+.square {
+    width: 80%;
+    height: 80%;
+    background-size:cover;
+    background: center center;
+    display: flex;
+    align-self: center;
+    justify-self: center;
+}
+.square:hover {
+    cursor: pointer;
+    background: #333;
 }
