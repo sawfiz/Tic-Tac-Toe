@@ -40,10 +40,7 @@ const gameBoard = (() => {
     }
   }
 
-  function addToBoard(piece, num, squareEl) {
-    const row = Math.floor(num / 3);
-    const col = num % 3;
-    console.log(row, col);
+  function addToBoard(piece, row, col, squareEl) {
     board[row][col] = piece;
     console.log('After add', JSON.parse(JSON.stringify(board)));
     if (piece === 'X') {
@@ -53,13 +50,12 @@ const gameBoard = (() => {
     }
   }
 
-  function gotWinner(player, index) {
+  function gotWinner(player, row, col) {
     let cols = 0;
     let rows = 0;
     let diag1 = 0;
     let diag2 = 0;
-    const row = Math.floor(index / 3);
-    const col = index % 3;
+
     for (let i = 0; i < boardSize; i++) {
       if (board[i][col] === player.piece) cols++;
       if (board[row][i] === player.piece) rows++;
@@ -89,17 +85,19 @@ const gameController = (() => {
   function trackInput() {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls.forEach((squareEl) => {
+      const index = squaresEls.indexOf(squareEl);
+      const row = Math.floor(index / 3);
+      const col = index % 3;
       squareEl.addEventListener('click', () => {
-        gameBoard.addToBoard(
-          currentPlayer.piece,
-          squaresEls.indexOf(squareEl),
-          squareEl
-        );
+        gameBoard.addToBoard(currentPlayer.piece, row, col, squareEl);
         // Disable the square once it has been clicked
         squareEl.style.pointerEvents = 'none';
         plays += 1;
-        if (gameBoard.gotWinner(currentPlayer, squaresEls.indexOf(squareEl))) {
+
+        if (gameBoard.gotWinner(currentPlayer, row, col)) {
           alert(`${currentPlayer.name} won!`);
+        } else if (plays >= boardSize * boardSize) {
+          alert('Tie!');
         } else {
           // Swap player turn
           currentPlayer = currentPlayer === player1 ? player2 : player1;
