@@ -10,12 +10,6 @@ function delay(time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-// Player objects
-const Player = (name, piece) => ({ name, piece });
-
-const player1 = Player('Player 1', 'X');
-const player2 = Player('Player 2', 'O');
-
 // Game board object using module
 const gameBoard = (() => {
   let board = [];
@@ -27,7 +21,6 @@ const gameBoard = (() => {
       ['', '', ''],
       ['', '', ''],
     ];
-
     // console.log('Intiialize', JSON.parse(JSON.stringify(board)));
 
     // Empty the board display
@@ -41,15 +34,36 @@ const gameBoard = (() => {
     }
   }
 
-  function addToBoard(piece, row, col, squareEl) {
+  function addToBoard(piece, index) {
+    console.log('gameBoard.addToBoard', index);
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
+
     board[row][col] = piece;
     const pieceEl = document.createElement('img');
     pieceEl.src = piece === 'X' ? 'images/X.png' : 'images/O.png';
     pieceEl.classList.add('piece');
-    squareEl.appendChild(pieceEl);
+    squaresEls[index].appendChild(pieceEl);
   }
 
-  function gotWinner(player, row, col) {
+  function getInput(callback) {
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
+    squaresEls.forEach((squareEl) => {
+      squareEl.addEventListener('click', () => {
+        squareEl.style.pointerEvents = 'none';
+        const index = squaresEls.indexOf(squareEl);
+        console.log('gameBoard.getInput(callback)', index);
+        callback(index);
+      });
+    });
+  }
+
+  function gotWinner(player, index) {
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+
     let cols = 0;
     let rows = 0;
     let diag1 = 0;
@@ -73,55 +87,82 @@ const gameBoard = (() => {
     return false;
   }
 
-  return { initializeBoard, addToBoard, gotWinner };
+  // eslint-disable-next-line object-curly-newline
+  return { initializeBoard, getInput, addToBoard, gotWinner };
 })();
+
+// Player objects
+const playerFactory = (name, piece) => {
+  function makeMove(callback) {
+    return gameBoard.getInput((index) => {
+      console.log('playerFactory.makeMove()', index);
+      callback(index);
+    });
+  }
+  return { name, piece, makeMove };
+};
+
+const player1 = playerFactory('Player 1', 'X');
+const player2 = playerFactory('Player 2', 'O');
 
 // gameController object using module
 const gameController = (() => {
   let currentPlayer = player1;
   let plays = 0;
 
-  function trackInput() {
-    const squaresEls = Array.from(document.querySelectorAll('.square'));
+  function game() {
     const player1El = document.querySelector('#player1');
     const player2El = document.querySelector('#player2');
-    if (currentPlayer === player1) {
-      player1El.classList.add('turn');
-    } else {
-      player2El.classList.add('turn');
-    }
-    squaresEls.forEach((squareEl) => {
-      const index = squaresEls.indexOf(squareEl);
-      const row = Math.floor(index / 3);
-      const col = index % 3;
-      squareEl.addEventListener('click', async () => {
-        gameBoard.addToBoard(currentPlayer.piece, row, col, squareEl);
-        // Disable the square once it has been clicked
-        squareEl.style.pointerEvents = 'none';
-        plays += 1;
-        await delay(100); // Wait a bit for display to finish update
-        if (gameBoard.gotWinner(currentPlayer, row, col)) {
-          alert(`${currentPlayer.name} won!`);
-        } else if (plays >= boardSize * boardSize) {
-          alert('Tie!');
+
+    currentPlayer.makeMove(async (index) => {
+      console.log('index in gameController.game()', index);
+
+      gameBoard.addToBoard(currentPlayer.piece, index);
+      if (currentPlayer === player1) {
+        player1El.classList.add('turn');
+      } else {
+        player2El.classList.add('turn');
+      }
+      plays += 1;
+      await delay(100); // Wait a bit for display to finish update
+      if (gameBoard.gotWinner(currentPlayer, index)) {
+        alert(`${currentPlayer.name} won!`);
+      } else if (plays >= boardSize * boardSize) {
+        alert('Tie!');
+      } else {
+        // Swap player turn
+        currentPlayer = currentPlayer === player1 ? player2 : player1;
+        if (currentPlayer === player1) {
+          player1El.classList.add('turn');
+          player2El.classList.remove('turn');
         } else {
-          // Swap player turn
-          currentPlayer = currentPlayer === player1 ? player2 : player1;
-          if (currentPlayer === player1) {
-            player1El.classList.add('turn');
-            player2El.classList.remove('turn');
-        } else {
-            player2El.classList.add('turn');
-            player1El.classList.remove('turn');
-          }
+          player2El.classList.add('turn');
+          player1El.classList.remove('turn');
         }
-      });
+      }
     });
   }
 
-  return { trackInput };
+  // function trackInput() {
+  //   const squaresEls = Array.from(document.querySelectorAll('.square'));
+  //   squaresEls.forEach((squareEl) => {
+  //     const index = squaresEls.indexOf(squareEl);
+  //     const row = Math.floor(index / 3);
+  //     const col = index % 3;
+  //     squareEl.addEventListener('click', async () => {
+  //       gameBoard.addToBoard(currentPlayer.piece, row, col, squareEl);
+  //       // Disable the square once it has been clicked
+  //       squareEl.style.pointerEvents = 'none';
+
+  //     });
+  //   });
+  // }
+
+  return { game };
 })();
 
 gameBoard.initializeBoard();
 
-gameController.trackInput();
+// gameController.trackInput();
+gameController.game();
+// player1.makeMove()
