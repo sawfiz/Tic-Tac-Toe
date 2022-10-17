@@ -34,24 +34,27 @@ const gameBoard = (() => {
     }
   }
 
+  // Add a play into the board array and display in browser
   function addToBoard(piece, index) {
     console.log('gameBoard.addToBoard', index);
     const row = Math.floor(index / 3);
     const col = index % 3;
-
-    const squaresEls = Array.from(document.querySelectorAll('.square'));
-
     board[row][col] = piece;
+
     const pieceEl = document.createElement('img');
     pieceEl.src = piece === 'X' ? 'images/X.png' : 'images/O.png';
     pieceEl.classList.add('piece');
+
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls[index].appendChild(pieceEl);
   }
 
+  // Make the board listen for human player plays
   function getInput(callback) {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls.forEach((squareEl) => {
       squareEl.addEventListener('click', () => {
+        // Disable a square from being clicked on again
         squareEl.style.pointerEvents = 'none';
         const index = squaresEls.indexOf(squareEl);
         console.log('gameBoard.getInput(callback)', index);
@@ -60,7 +63,8 @@ const gameBoard = (() => {
     });
   }
 
-  function gotWinner(player, index) {
+  // Check if there is a winner
+  function isWinner(player, index) {
     const row = Math.floor(index / 3);
     const col = index % 3;
 
@@ -88,7 +92,7 @@ const gameBoard = (() => {
   }
 
   // eslint-disable-next-line object-curly-newline
-  return { initializeBoard, getInput, addToBoard, gotWinner };
+  return { initializeBoard, getInput, addToBoard, isWinner };
 })();
 
 // Player objects
@@ -107,62 +111,60 @@ const player2 = playerFactory('Player 2', 'O');
 
 // gameController object using module
 const gameController = (() => {
+  const player1El = document.querySelector('#player1');
+  const player2El = document.querySelector('#player2');
   let currentPlayer = player1;
   let plays = 0;
 
-  function game() {
-    const player1El = document.querySelector('#player1');
-    const player2El = document.querySelector('#player2');
+  function swapPlayerTurn() {
+    // Swap player turn
+    currentPlayer = currentPlayer === player1 ? player2 : player1;
+    // Swap player highlight in the display
+    if (currentPlayer === player1) {
+      player1El.classList.add('turn');
+      player2El.classList.remove('turn');
+    } else {
+      player2El.classList.add('turn');
+      player1El.classList.remove('turn');
+    }
+  }
 
+  function playOneRound() {
+    // Highlight the first player to play
+    if (currentPlayer === player1) {
+      player1El.classList.add('turn');
+    } else {
+      player2El.classList.add('turn');
+    }
+
+    // Wait for player to move
     currentPlayer.makeMove(async (index) => {
       console.log('index in gameController.game()', index);
-
       gameBoard.addToBoard(currentPlayer.piece, index);
-      if (currentPlayer === player1) {
-        player1El.classList.add('turn');
-      } else {
-        player2El.classList.add('turn');
-      }
       plays += 1;
-      await delay(100); // Wait a bit for display to finish update
-      if (gameBoard.gotWinner(currentPlayer, index)) {
+      // Wait a bit for display to finish update before decide if the game is won
+      await delay(100);
+
+      if (gameBoard.isWinner(currentPlayer, index)) {
         alert(`${currentPlayer.name} won!`);
+        restartGame();
       } else if (plays >= boardSize * boardSize) {
         alert('Tie!');
-      } else {
-        // Swap player turn
-        currentPlayer = currentPlayer === player1 ? player2 : player1;
-        if (currentPlayer === player1) {
-          player1El.classList.add('turn');
-          player2El.classList.remove('turn');
-        } else {
-          player2El.classList.add('turn');
-          player1El.classList.remove('turn');
-        }
+        restartGame();
       }
+      swapPlayerTurn();
     });
   }
 
-  // function trackInput() {
-  //   const squaresEls = Array.from(document.querySelectorAll('.square'));
-  //   squaresEls.forEach((squareEl) => {
-  //     const index = squaresEls.indexOf(squareEl);
-  //     const row = Math.floor(index / 3);
-  //     const col = index % 3;
-  //     squareEl.addEventListener('click', async () => {
-  //       gameBoard.addToBoard(currentPlayer.piece, row, col, squareEl);
-  //       // Disable the square once it has been clicked
-  //       squareEl.style.pointerEvents = 'none';
+  function restartGame() {
+    gameBoard.initializeBoard();
+    plays = 0;
+    playOneRound();
+  }
 
-  //     });
-  //   });
-  // }
-
-  return { game };
+  return { playOneRound };
 })();
 
 gameBoard.initializeBoard();
 
-// gameController.trackInput();
-gameController.game();
-// player1.makeMove()
+gameController.playOneRound();
