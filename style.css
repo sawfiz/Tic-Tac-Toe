@@ -3,6 +3,7 @@
   padding: 0;
   box-sizing: border-box;
   /* border: 1px solid red; */
+  font-family:'Courier New', Courier, monospace;
 }
 
 body {
@@ -28,7 +29,7 @@ h1 {
     /* border: 1px solid red; */
 }
 
-.player-container, .player-container {
+.player-container {
     /* width: 20%; */
     flex: 1;
     height: 60%;
@@ -36,23 +37,33 @@ h1 {
     background-color: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     color: white;
-    /* border: 1px solid red; */
     margin: 30px;
+    box-shadow: 0px 0px 20px white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.player-container.turn{
+    box-shadow: 0px 0px 20px yellow;
 }
 
-.player {
-    width: 80%;
-    text-align: center;
-    font-size: 3rem;
+.player-id {
+    font-size: 1.5rem;
+    font-weight: bolder;
 }
-
-#player1.turn {
-    color: yellow;
+.player-name {
+    font-size: 1.5rem;
 }
-#player2.turn {
-    color: yellow;
+.player-type {
+    font-size: 1.5rem;
 }
-
+.player-score {
+    font-size: 1.5rem;
+}
+.player-marker img {
+    width: 100px;
+}
 
 .board {
     /* border: 1px solid red; */
@@ -61,7 +72,7 @@ h1 {
     height: 90%;
     display: grid;
     grid-template-columns: 0.9fr 1.2fr 1fr;
-    grid-template-rows: 1fr 1fr 1.2fr;
+    grid-template-rows: 0.9fr 0.8fr 1fr;
     gap: 50px;
     /* border: 1px solid red; */
 }
@@ -76,6 +87,7 @@ h1 {
     justify-self: center;
     justify-content: center;
     align-items: center;
+    border-radius: 10px;
 }
 .square:hover {
     cursor: pointer;

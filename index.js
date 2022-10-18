@@ -1,9 +1,12 @@
+/* eslint-disable no-use-before-define */
+/* eslint-disable object-curly-newline */
 /* eslint-disable operator-linebreak */
 /* eslint-disable comma-dangle */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
 const boardEl = document.querySelector('.board');
 const boardSize = 3;
+const NumOfRounds = 3;
 
 function delay(time) {
   // eslint-disable-next-line no-promise-executor-return
@@ -36,7 +39,7 @@ const gameBoard = (() => {
 
   // Add a play into the board array and display in browser
   function addToBoard(piece, index) {
-    console.log('gameBoard.addToBoard', index);
+    // console.log('gameBoard.addToBoard', index);
     const row = Math.floor(index / 3);
     const col = index % 3;
     board[row][col] = piece;
@@ -57,7 +60,7 @@ const gameBoard = (() => {
         // Disable a square from being clicked on again
         squareEl.style.pointerEvents = 'none';
         const index = squaresEls.indexOf(squareEl);
-        console.log('gameBoard.getInput(callback)', index);
+        // console.log('gameBoard.getInput(callback)', index);
         callback(index);
       });
     });
@@ -91,80 +94,118 @@ const gameBoard = (() => {
     return false;
   }
 
+  function updatePlayerPanels(currentPlayer) {
+    const player1ContainerEl = document.querySelector('#player1-container');
+    const player2ContainerEl = document.querySelector('#player2-container');
+    const player1NameEl = document.querySelector('#player1-name');
+    const player2NameEl = document.querySelector('#player2-name');
+
+    player1NameEl.innerText = player1.name;
+    player2NameEl.innerText = player2.name;
+
+    if (currentPlayer === player1) {
+      player1ContainerEl.classList.add('turn');
+      player2ContainerEl.classList.remove('turn');
+    } else {
+      player2ContainerEl.classList.add('turn');
+      player1ContainerEl.classList.remove('turn');
+    }
+  }
+
   // eslint-disable-next-line object-curly-newline
-  return { initializeBoard, getInput, addToBoard, isWinner };
+  return {
+    initializeBoard,
+    getInput,
+    addToBoard,
+    isWinner,
+    updatePlayerPanels,
+  };
 })();
 
 // Player objects
-const playerFactory = (name, piece) => {
+const playerFactory = (name, type, piece) => {
   function makeMove(callback) {
-    return gameBoard.getInput((index) => {
-      console.log('playerFactory.makeMove()', index);
-      callback(index);
-    });
+    // console.log(name, 'Player type', this.type);
+    if (this.type === 'human') {
+      return gameBoard.getInput((index) => {
+        // console.log('playerFactory.makeMove()', index);
+        callback(index);
+      });
+    }
+    // Computer player
+    const index = Math.floor(Math.random() * 9);
+    console.log('Computer move', index);
+    callback(index);
   }
-  return { name, piece, makeMove };
-};
 
-const player1 = playerFactory('Player 1', 'X');
-const player2 = playerFactory('Player 2', 'O');
+  return { name, type, piece, makeMove };
+};
+const player1 = playerFactory('Tom', 'human', 'X');
+const player2 = playerFactory('Jerry', 'computer', 'O');
 
 // gameController object using module
 const gameController = (() => {
-  const player1El = document.querySelector('#player1');
-  const player2El = document.querySelector('#player2');
   let currentPlayer = player1;
+  let rounds = 0;
   let plays = 0;
 
   function swapPlayerTurn() {
     // Swap player turn
     currentPlayer = currentPlayer === player1 ? player2 : player1;
     // Swap player highlight in the display
-    if (currentPlayer === player1) {
-      player1El.classList.add('turn');
-      player2El.classList.remove('turn');
-    } else {
-      player2El.classList.add('turn');
-      player1El.classList.remove('turn');
-    }
+    gameBoard.updatePlayerPanels(currentPlayer);
   }
 
-  function playOneRound() {
+  function playOneRound(callback) {
+    console.log('Round', rounds);
     // Highlight the first player to play
-    if (currentPlayer === player1) {
-      player1El.classList.add('turn');
-    } else {
-      player2El.classList.add('turn');
-    }
-
+    gameBoard.updatePlayerPanels(currentPlayer);
+    plays = 0;
     // Wait for player to move
+    makeOneMove(() => {
+      console.log('Round over');
+      callback();
+    });
+  }
+
+  function makeOneMove(callback) {
     currentPlayer.makeMove(async (index) => {
-      console.log('index in gameController.game()', index);
+      // console.log('index in gameController.game()', index);
       gameBoard.addToBoard(currentPlayer.piece, index);
       plays += 1;
+      // console.log('plays', plays);
       // Wait a bit for display to finish update before decide if the game is won
       await delay(100);
 
       if (gameBoard.isWinner(currentPlayer, index)) {
         alert(`${currentPlayer.name} won!`);
-        restartGame();
-      } else if (plays >= boardSize * boardSize) {
+        gameBoard.initializeBoard();
+        callback();
+      }
+      if (plays >= boardSize * boardSize) {
         alert('Tie!');
-        restartGame();
+        gameBoard.initializeBoard();
+        callback();
       }
       swapPlayerTurn();
     });
   }
 
-  function restartGame() {
+  // Play a number of games in sequence
+  function newGame() {
     gameBoard.initializeBoard();
-    plays = 0;
-    playOneRound();
+    gameBoard.updatePlayerPanels(player1);
+    rounds += 1;
+    playOneRound(() => {
+      if (rounds < NumOfRounds) {
+        newGame();
+      } else {
+        alert('Game over!');
+      }
+    });
   }
 
-  return { playOneRound };
+  return { newGame };
 })();
 
-gameBoard.initializeBoard();
-
-gameController.playOneRound();
+gameController.newGame();
