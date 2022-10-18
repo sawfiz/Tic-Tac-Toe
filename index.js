@@ -112,6 +112,12 @@ const gameBoard = (() => {
     }
   }
 
+  function isSquareEmpty(index) {
+    const row = Math.floor(index / 3);
+    const col = index % 3;
+    return board[row][col] === '';
+  }
+
   // eslint-disable-next-line object-curly-newline
   return {
     initializeBoard,
@@ -119,13 +125,14 @@ const gameBoard = (() => {
     addToBoard,
     isWinner,
     updatePlayerPanels,
+    isSquareEmpty,
   };
 })();
 
 // Player objects
 const playerFactory = (name, type, piece) => {
   function makeMove(callback) {
-    // console.log(name, 'Player type', this.type);
+    console.log('In player', this, name, 'Player type', this.type);
     if (this.type === 'human') {
       return gameBoard.getInput((index) => {
         // console.log('playerFactory.makeMove()', index);
@@ -133,7 +140,13 @@ const playerFactory = (name, type, piece) => {
       });
     }
     // Computer player
-    const index = Math.floor(Math.random() * 9);
+    let index;
+    while (true) {
+      index = Math.floor(Math.random() * 9);
+      if (gameBoard.isSquareEmpty(index)) {
+        break;
+      }
+    }
     console.log('Computer move', index);
     callback(index);
   }
@@ -156,38 +169,45 @@ const gameController = (() => {
     gameBoard.updatePlayerPanels(currentPlayer);
   }
 
-  function playOneRound(callback) {
+  function playOneRound() {
     console.log('Round', rounds);
     // Highlight the first player to play
     gameBoard.updatePlayerPanels(currentPlayer);
     plays = 0;
-    // Wait for player to move
+    console.log('current player in playOneRound', currentPlayer);
+    // Wait for player to move then check for win
     makeOneMove(() => {
-      console.log('Round over');
-      callback();
+      if (plays < 9) {
+        makeOneMove();
+      } else {
+        callback();
+      }
     });
   }
 
   function makeOneMove(callback) {
     currentPlayer.makeMove(async (index) => {
+      // console.log('current player in gamecontroller', currentPlayer);
       // console.log('index in gameController.game()', index);
       gameBoard.addToBoard(currentPlayer.piece, index);
       plays += 1;
       // console.log('plays', plays);
       // Wait a bit for display to finish update before decide if the game is won
       await delay(100);
-
       if (gameBoard.isWinner(currentPlayer, index)) {
         alert(`${currentPlayer.name} won!`);
         gameBoard.initializeBoard();
         callback();
+        // return;
       }
+
       if (plays >= boardSize * boardSize) {
         alert('Tie!');
         gameBoard.initializeBoard();
         callback();
       }
       swapPlayerTurn();
+      callback();
     });
   }
 
