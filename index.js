@@ -132,23 +132,24 @@ const gameBoard = (() => {
 // Player objects
 const playerFactory = (name, type, piece) => {
   function makeMove(callback) {
-    console.log('In player', this, name, 'Player type', this.type);
+    // console.log('In player', this, name, 'Player type', this.type);
     if (this.type === 'human') {
-      return gameBoard.getInput((index) => {
+      gameBoard.getInput((index) => {
         // console.log('playerFactory.makeMove()', index);
         callback(index);
       });
-    }
-    // Computer player
-    let index;
-    while (true) {
-      index = Math.floor(Math.random() * 9);
-      if (gameBoard.isSquareEmpty(index)) {
-        break;
+    } else {
+      // Computer player
+      let index;
+      while (true) {
+        index = Math.floor(Math.random() * 9);
+        if (gameBoard.isSquareEmpty(index)) {
+          break;
+        }
       }
+      console.log('Computer move', index);
+      callback(index);
     }
-    console.log('Computer move', index);
-    callback(index);
   }
 
   return { name, type, piece, makeMove };
@@ -169,45 +170,45 @@ const gameController = (() => {
     gameBoard.updatePlayerPanels(currentPlayer);
   }
 
-  function playOneRound() {
-    console.log('Round', rounds);
-    // Highlight the first player to play
-    gameBoard.updatePlayerPanels(currentPlayer);
-    plays = 0;
-    console.log('current player in playOneRound', currentPlayer);
-    // Wait for player to move then check for win
-    makeOneMove(() => {
-      if (plays < 9) {
-        makeOneMove();
+  function makeOneMove() {
+    console.log('Before move', currentPlayer);
+    currentPlayer.makeMove(async (index) => {
+      gameBoard.addToBoard(currentPlayer.piece, index);
+      plays += 1;
+      // Wait a bit for display to finish update before decide if the game is won
+      await delay(100);
+
+      if (gameBoard.isWinner(currentPlayer, index)) {
+        alert(`${currentPlayer.name} won!`);
+        // gameBoard.initializeBoard();
+        // callback(true);
+      } else if (plays >= boardSize * boardSize) {
+        alert('Tie!');
+        // callback(true);
+        // gameBoard.initializeBoard();
       } else {
-        callback();
+        swapPlayerTurn();
+        console.log('After swap', currentPlayer);
+        // callback(false);
       }
     });
   }
 
-  function makeOneMove(callback) {
-    currentPlayer.makeMove(async (index) => {
-      // console.log('current player in gamecontroller', currentPlayer);
-      // console.log('index in gameController.game()', index);
-      gameBoard.addToBoard(currentPlayer.piece, index);
-      plays += 1;
-      // console.log('plays', plays);
-      // Wait a bit for display to finish update before decide if the game is won
-      await delay(100);
-      if (gameBoard.isWinner(currentPlayer, index)) {
-        alert(`${currentPlayer.name} won!`);
-        gameBoard.initializeBoard();
+  function playOneRound(callback) {
+    console.log('Round', rounds);
+    // Highlight the first player to play
+    gameBoard.updatePlayerPanels(currentPlayer);
+    plays = 0;
+    // console.log('current player in playOneRound', currentPlayer);
+    // Wait for player to move then check for win
+    makeOneMove((over) => {
+      console.log(plays);
+      if (over === true) {
         callback();
-        // return;
+      } else if (plays < 9) {
+        makeOneMove();
+        console.log('Next move');
       }
-
-      if (plays >= boardSize * boardSize) {
-        alert('Tie!');
-        gameBoard.initializeBoard();
-        callback();
-      }
-      swapPlayerTurn();
-      callback();
     });
   }
 
@@ -215,17 +216,23 @@ const gameController = (() => {
   function newGame() {
     gameBoard.initializeBoard();
     gameBoard.updatePlayerPanels(player1);
-    rounds += 1;
-    playOneRound(() => {
-      if (rounds < NumOfRounds) {
-        newGame();
-      } else {
-        alert('Game over!');
-      }
-    });
+    // rounds += 1;
+    // playOneRound(() => {
+    //   if (rounds < NumOfRounds) {
+    //     newGame();
+    //   } else {
+    //     alert('Game over!');
+    //   }
+    // });
   }
 
-  return { newGame };
+  return { newGame, playOneRound, makeOneMove };
 })();
 
 gameController.newGame();
+// gameController.playOneRound();
+// gameController.makeOneMove((done) => {
+//   console.log(done);
+// });
+
+gameController.makeOneMove();
