@@ -134,10 +134,7 @@ const playerFactory = (name, type, piece) => {
   function makeMove(callback) {
     // console.log('In player', this, name, 'Player type', this.type);
     if (this.type === 'human') {
-      gameBoard.getInput((index) => {
-        // console.log('playerFactory.makeMove()', index);
-        callback(index);
-      });
+      gameBoard.getInput((index) => callback(index));
     } else {
       // Computer player
       let index;
@@ -170,44 +167,43 @@ const gameController = (() => {
     gameBoard.updatePlayerPanels(currentPlayer);
   }
 
-  function makeOneMove() {
-    console.log('Before move', currentPlayer);
+  function isRoundOver(index) {
+    if (gameBoard.isWinner(currentPlayer, index)) {
+      alert(`${currentPlayer.name} won!`);
+      return true;
+    }
+    if (plays >= boardSize * boardSize) {
+      alert('Tie!');
+      return true;
+    }
+    return false;
+  }
+
+  function playOneRound() {
+    console.log('Round', rounds, 'starts!');
     currentPlayer.makeMove(async (index) => {
+      // console.log('New move', currentPlayer);
       gameBoard.addToBoard(currentPlayer.piece, index);
       plays += 1;
       // Wait a bit for display to finish update before decide if the game is won
       await delay(100);
 
-      if (gameBoard.isWinner(currentPlayer, index)) {
-        alert(`${currentPlayer.name} won!`);
-        // gameBoard.initializeBoard();
-        // callback(true);
-      } else if (plays >= boardSize * boardSize) {
-        alert('Tie!');
-        // callback(true);
-        // gameBoard.initializeBoard();
-      } else {
+      if (!isRoundOver(index)) {
         swapPlayerTurn();
-        console.log('After swap', currentPlayer);
-        // callback(false);
-      }
-    });
-  }
-
-  function playOneRound(callback) {
-    console.log('Round', rounds);
-    // Highlight the first player to play
-    gameBoard.updatePlayerPanels(currentPlayer);
-    plays = 0;
-    // console.log('current player in playOneRound', currentPlayer);
-    // Wait for player to move then check for win
-    makeOneMove((over) => {
-      console.log(plays);
-      if (over === true) {
-        callback();
-      } else if (plays < 9) {
-        makeOneMove();
-        console.log('Next move');
+        // console.log('After swap', currentPlayer);
+        if (currentPlayer.type === 'computer') {
+          currentPlayer.makeMove(async (aiIndex) => {
+            // console.log('computer move', currentPlayer);
+            gameBoard.addToBoard(currentPlayer.piece, aiIndex);
+            plays += 1;
+            await delay(100);
+            if (!isRoundOver(aiIndex)) {
+              swapPlayerTurn();
+            }
+          });
+        }
+      } else {
+        return;
       }
     });
   }
@@ -216,23 +212,20 @@ const gameController = (() => {
   function newGame() {
     gameBoard.initializeBoard();
     gameBoard.updatePlayerPanels(player1);
-    // rounds += 1;
-    // playOneRound(() => {
-    //   if (rounds < NumOfRounds) {
-    //     newGame();
-    //   } else {
-    //     alert('Game over!');
-    //   }
-    // });
+    rounds += 1;
+    playOneRound(() => {
+      console.log('Round', rounds, 'over!');
+      gameBoard.initializeBoard();
+      gameBoard.updatePlayerPanels(player1);
+      if (rounds < NumOfRounds) {
+        playOneRound();
+      } else {
+        alert('Game over!');
+      }
+    });
   }
 
-  return { newGame, playOneRound, makeOneMove };
+  return { newGame };
 })();
 
 gameController.newGame();
-// gameController.playOneRound();
-// gameController.makeOneMove((done) => {
-//   console.log(done);
-// });
-
-gameController.makeOneMove();
