@@ -30,6 +30,33 @@
         </div>
     </div>
     <footer>Copyright Sawfiz@Github</footer>
+
+    <dialog class="modal">
+        <div class="game-setup">
+
+            <form action="">
+                <h2>Player 1</h2>
+                <label for="player1-name">Name</label>
+                <input type="text" name="player1-name" id="player1-name-input">
+                <label for="player1-type">Type</label>
+                <select name="player1-type" id="player1-type-input">
+                    <option value="human">human</option>
+                    <option value="computer">computer</option>
+                </select>
+                <h2>Player 2</h2>
+                <label for="player2-name">Name</label>
+                <input type="text" name="player2-name" id="player2-name-input">
+                <label for="player2-type">Type</label>
+                <select name="player2-type" id="player2-type-input">
+                    <option value="human">human</option>
+                </select>
+                <br>
+                <button type="submit" id="start-game">Start Game</button>
+            </form>
+        </div>
+    </dialog>
+
+
     <script src="index.js"></script>
 </body>
 

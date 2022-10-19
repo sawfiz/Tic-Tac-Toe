@@ -263,6 +263,18 @@ const gameController = (() => {
   return { newGame };
 })();
 
-gameController.newGame();
+const modalEl = document.querySelector('.modal');
+const startBtn = document.querySelector('#start-game');
+const player1TypeInputEl = document.querySelector('#player1-type-input');
+modalEl.showModal();
+startBtn.addEventListener('click', (e) => {
+  e.preventDefault();
+  console.log(player1TypeInputEl.value);
+  
+  player1.type = player1TypeInputEl.value;
+  modalEl.close();
+  gameController.newGame();
+});
+
 
 // TODO:

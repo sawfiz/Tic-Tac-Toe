@@ -98,6 +98,17 @@ h1 {
     width: 60%;
 }
 
+dialog {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 500px;
+    height: 200px;
+    padding: 2rem;
+}
+
+
 footer {
     color: red;
 }
