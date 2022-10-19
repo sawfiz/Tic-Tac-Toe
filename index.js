@@ -17,7 +17,6 @@ function delay(time) {
 const gameBoard = (() => {
   let board = [];
 
-
   function initializeBoard() {
     // Reset the board array
     board = [
@@ -54,7 +53,7 @@ const gameBoard = (() => {
   }
 
   // Make the board listen for human player plays
-  function getInput(callback) {
+  function getInput(piece, callback) {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls.forEach((squareEl) => {
       squareEl.addEventListener('click', () => {
@@ -90,6 +89,7 @@ const gameBoard = (() => {
       diag1 === boardSize ||
       diag2 === boardSize
     ) {
+      player.score += 1;
       return true;
     }
     return false;
@@ -100,9 +100,17 @@ const gameBoard = (() => {
     const player2ContainerEl = document.querySelector('#player2-container');
     const player1NameEl = document.querySelector('#player1-name');
     const player2NameEl = document.querySelector('#player2-name');
+    const player1TypeEl = document.querySelector('#player1-type');
+    const player2TypeEl = document.querySelector('#player2-type');
+    const player1ScoreEl = document.querySelector('#player1-score');
+    const player2ScoreEl = document.querySelector('#player2-score');
 
     player1NameEl.innerText = player1.name;
     player2NameEl.innerText = player2.name;
+    player1TypeEl.innerText = player1.type;
+    player2TypeEl.innerText = player2.type;
+    player1ScoreEl.innerText = `Wins: ${player1.score}`;
+    player2ScoreEl.innerText = `Wins: ${player2.score}`;
 
     if (currentPlayer === player1) {
       player1ContainerEl.classList.add('turn');
@@ -137,11 +145,11 @@ const gameBoard = (() => {
 })();
 
 // Player objects
-const playerFactory = (name, type, piece) => {
+const playerFactory = (name, type, piece, score) => {
   function makeMove(callback) {
     // console.log('In player', this, name, 'Player type', this.type);
     if (this.type === 'human') {
-      gameBoard.getInput((index) => callback(index));
+      gameBoard.getInput(piece, (index) => callback(index));
     } else {
       // Computer player
       let index;
@@ -157,10 +165,10 @@ const playerFactory = (name, type, piece) => {
     }
   }
 
-  return { name, type, piece, makeMove };
+  return { name, type, piece, score, makeMove };
 };
-const player1 = playerFactory('Tom', 'human', 'X');
-const player2 = playerFactory('Jerry', 'computer', 'O');
+const player1 = playerFactory('Tom', 'human', 'X', 0);
+const player2 = playerFactory('Jerry', 'computer', 'O', 0);
 
 // gameController object using module
 const gameController = (() => {
@@ -170,7 +178,6 @@ const gameController = (() => {
 
   function swapPlayerTurn() {
     currentPlayer = currentPlayer === player1 ? player2 : player1;
-    gameBoard.updatePlayerPanels(currentPlayer);
   }
 
   function isRoundOver(index) {
@@ -195,13 +202,15 @@ const gameController = (() => {
 
       if (!isRoundOver(index)) {
         swapPlayerTurn();
+        gameBoard.updatePlayerPanels(currentPlayer);
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
             plays += 1;
-            await delay(100);
+            await delay(200);
             if (!isRoundOver(aiIndex)) {
               swapPlayerTurn();
+              gameBoard.updatePlayerPanels(currentPlayer);
             } else {
               console.log('Round', rounds, 'over!');
               callback();
@@ -218,11 +227,11 @@ const gameController = (() => {
   // Play a number of games in sequence
   function newGame() {
     gameBoard.initializeBoard();
-    gameBoard.updatePlayerPanels(player1);
+    gameBoard.updatePlayerPanels(player1); // Why do I need to pass in player1?
     rounds += 1;
     playOneRound(() => {
-      plays = 0;
-      currentPlayer = player1;
+      plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
+      currentPlayer = player1; // I do not like this, starting players should swap for each round
       console.log('in newGame, Round', rounds, 'over!');
       if (rounds < NumOfRounds) {
         newGame();
@@ -236,3 +245,7 @@ const gameController = (() => {
 })();
 
 gameController.newGame();
+
+// TODO:
+// - currently each round is played starting with player1, a human player
+// - if currentPlayer swaps, and a computer player starts, the code breaks.
