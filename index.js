@@ -161,9 +161,7 @@ const gameController = (() => {
   let plays = 0;
 
   function swapPlayerTurn() {
-    // Swap player turn
     currentPlayer = currentPlayer === player1 ? player2 : player1;
-    // Swap player highlight in the display
     gameBoard.updatePlayerPanels(currentPlayer);
   }
 
@@ -179,10 +177,9 @@ const gameController = (() => {
     return false;
   }
 
-  function playOneRound() {
+  function playOneRound(callback) {
     console.log('Round', rounds, 'starts!');
     currentPlayer.makeMove(async (index) => {
-      // console.log('New move', currentPlayer);
       gameBoard.addToBoard(currentPlayer.piece, index);
       plays += 1;
       // Wait a bit for display to finish update before decide if the game is won
@@ -190,20 +187,22 @@ const gameController = (() => {
 
       if (!isRoundOver(index)) {
         swapPlayerTurn();
-        // console.log('After swap', currentPlayer);
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
-            // console.log('computer move', currentPlayer);
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
             plays += 1;
             await delay(100);
             if (!isRoundOver(aiIndex)) {
               swapPlayerTurn();
+            } else {
+              console.log('Round', rounds, 'over!');
+              callback();
             }
           });
         }
       } else {
-        return;
+        console.log('Round', rounds, 'over!');
+        callback();
       }
     });
   }
@@ -214,11 +213,13 @@ const gameController = (() => {
     gameBoard.updatePlayerPanels(player1);
     rounds += 1;
     playOneRound(() => {
-      console.log('Round', rounds, 'over!');
+      plays = 0;
+      currentPlayer = player1;
+      console.log('in newGame, Round', rounds, 'over!');
       gameBoard.initializeBoard();
       gameBoard.updatePlayerPanels(player1);
       if (rounds < NumOfRounds) {
-        playOneRound();
+        newGame();
       } else {
         alert('Game over!');
       }
