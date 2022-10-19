@@ -183,10 +183,13 @@ const gameController = (() => {
   function isRoundOver(index) {
     if (gameBoard.isWinner(currentPlayer, index)) {
       alert(`${currentPlayer.name} won!`);
+      swapPlayerTurn(); // Make the loser go first next round.
       return true;
     }
     if (plays >= boardSize * boardSize) {
       alert('Tie!');
+      // In case of a tie game, the player to play first in the next round is 
+      // the second to go in this round, as there are 9 moves in a round.
       return true;
     }
     return false;
@@ -222,7 +225,7 @@ const gameController = (() => {
           currentPlayer.makeMove(async (aiIndex) => {
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
             plays += 1;
-            await delay(200);
+            await delay(1000);
             if (!isRoundOver(aiIndex)) {
               swapPlayerTurn();
               gameBoard.updatePlayerPanels(currentPlayer);
@@ -242,11 +245,10 @@ const gameController = (() => {
   // Play a number of games in sequence
   function newGame() {
     gameBoard.initializeBoard();
-    gameBoard.updatePlayerPanels(player1); // Why do I need to pass in player1?
+    gameBoard.updatePlayerPanels(player1); 
     rounds += 1;
     playOneRound(() => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
-      // currentPlayer = player1; // I do not like this, starting players should swap for each round
       console.log('in newGame, Round', rounds, 'over!');
       if (rounds < NumOfRounds) {
         newGame();
