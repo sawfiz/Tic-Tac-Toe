@@ -194,6 +194,20 @@ const gameController = (() => {
 
   function playOneRound(callback) {
     console.log('Round', rounds, 'starts!');
+
+    // This code gets executed in case computer is the frst to move
+    // Then the rest of this function makes a computer move after each human move (click)
+    if (currentPlayer.type === 'computer') {
+      currentPlayer.makeMove((aiIndex) => {
+        gameBoard.addToBoard(currentPlayer.piece, aiIndex);
+        plays += 1;
+        swapPlayerTurn();
+        gameBoard.updatePlayerPanels(currentPlayer);
+      });
+    }
+
+    // The code below waits for a human play (a click),
+    // then followed by a computer play if there is a computer player
     currentPlayer.makeMove(async (index) => {
       gameBoard.addToBoard(currentPlayer.piece, index);
       plays += 1;
@@ -203,6 +217,7 @@ const gameController = (() => {
       if (!isRoundOver(index)) {
         swapPlayerTurn();
         gameBoard.updatePlayerPanels(currentPlayer);
+        // If a player is computer, the computer makes a move after each human play
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
@@ -231,7 +246,7 @@ const gameController = (() => {
     rounds += 1;
     playOneRound(() => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
-      currentPlayer = player1; // I do not like this, starting players should swap for each round
+      // currentPlayer = player1; // I do not like this, starting players should swap for each round
       console.log('in newGame, Round', rounds, 'over!');
       if (rounds < NumOfRounds) {
         newGame();
@@ -247,5 +262,4 @@ const gameController = (() => {
 gameController.newGame();
 
 // TODO:
-// - currently each round is played starting with player1, a human player
-// - if currentPlayer swaps, and a computer player starts, the code breaks.
+
