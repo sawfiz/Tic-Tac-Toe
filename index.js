@@ -167,8 +167,8 @@ const playerFactory = (name, type, piece, score) => {
 
   return { name, type, piece, score, makeMove };
 };
-const player1 = playerFactory('Tom', 'human', 'X', 0);
-const player2 = playerFactory('Jerry', 'computer', 'O', 0);
+const player1 = playerFactory('Tom', 'computer', 'X', 0);
+const player2 = playerFactory('Jerry', 'human', 'O', 0);
 
 // gameController object using module
 const gameController = (() => {
@@ -188,7 +188,7 @@ const gameController = (() => {
     }
     if (plays >= boardSize * boardSize) {
       alert('Tie!');
-      // In case of a tie game, the player to play first in the next round is 
+      // In case of a tie game, the player to play first in the next round is
       // the second to go in this round, as there are 9 moves in a round.
       return true;
     }
@@ -223,9 +223,10 @@ const gameController = (() => {
         // If a player is computer, the computer makes a move after each human play
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
+            await delay(500);
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
             plays += 1;
-            await delay(1000);
+            await delay(100);
             if (!isRoundOver(aiIndex)) {
               swapPlayerTurn();
               gameBoard.updatePlayerPanels(currentPlayer);
@@ -243,9 +244,10 @@ const gameController = (() => {
   }
 
   // Play a number of games in sequence
-  function newGame() {
+  async function newGame() {
     gameBoard.initializeBoard();
-    gameBoard.updatePlayerPanels(player1); 
+    gameBoard.updatePlayerPanels(player1);
+    await delay(500);
     rounds += 1;
     playOneRound(() => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
@@ -264,4 +266,3 @@ const gameController = (() => {
 gameController.newGame();
 
 // TODO:
-
