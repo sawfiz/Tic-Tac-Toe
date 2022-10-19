@@ -17,6 +17,7 @@ function delay(time) {
 const gameBoard = (() => {
   let board = [];
 
+
   function initializeBoard() {
     // Reset the board array
     board = [
@@ -40,6 +41,7 @@ const gameBoard = (() => {
   // Add a play into the board array and display in browser
   function addToBoard(piece, index) {
     // console.log('gameBoard.addToBoard', index);
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
     const row = Math.floor(index / 3);
     const col = index % 3;
     board[row][col] = piece;
@@ -48,7 +50,6 @@ const gameBoard = (() => {
     pieceEl.src = piece === 'X' ? 'images/X.png' : 'images/O.png';
     pieceEl.classList.add('piece');
 
-    const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls[index].appendChild(pieceEl);
   }
 
@@ -118,6 +119,11 @@ const gameBoard = (() => {
     return board[row][col] === '';
   }
 
+  function disableSquare(index) {
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
+    squaresEls[index].style.pointerEvents = 'none';
+  }
+
   // eslint-disable-next-line object-curly-newline
   return {
     initializeBoard,
@@ -126,6 +132,7 @@ const gameBoard = (() => {
     isWinner,
     updatePlayerPanels,
     isSquareEmpty,
+    disableSquare,
   };
 })();
 
@@ -141,6 +148,7 @@ const playerFactory = (name, type, piece) => {
       while (true) {
         index = Math.floor(Math.random() * 9);
         if (gameBoard.isSquareEmpty(index)) {
+          gameBoard.disableSquare(index);
           break;
         }
       }
@@ -216,8 +224,6 @@ const gameController = (() => {
       plays = 0;
       currentPlayer = player1;
       console.log('in newGame, Round', rounds, 'over!');
-      gameBoard.initializeBoard();
-      gameBoard.updatePlayerPanels(player1);
       if (rounds < NumOfRounds) {
         newGame();
       } else {
