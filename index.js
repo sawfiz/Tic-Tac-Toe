@@ -6,7 +6,7 @@
 /* eslint-disable no-plusplus */
 const boardEl = document.querySelector('.board');
 const boardSize = 3;
-let NumOfRounds = 3;
+let NumOfGames = 3;
 
 function delay(time) {
   // eslint-disable-next-line no-promise-executor-return
@@ -134,6 +134,7 @@ const gameBoard = (() => {
 
   // eslint-disable-next-line object-curly-newline
   return {
+    board,
     initializeBoard,
     getInput,
     addToBoard,
@@ -173,7 +174,7 @@ const player2 = playerFactory('Jerry', 'human', 'O', 0);
 // gameController object using module
 const gameController = (() => {
   let currentPlayer = player1;
-  let rounds = 0;
+  let games = 0;
   let plays = 0;
 
   function swapPlayerTurn() {
@@ -195,8 +196,8 @@ const gameController = (() => {
     return false;
   }
 
-  function playOneRound(callback) {
-    console.log('Round', rounds, 'starts!');
+  function playOneGame(callback) {
+    console.log('Game', games, 'starts!');
 
     // This code gets executed in case computer is the frst to move
     // Then the rest of this function makes a computer move after each human move (click)
@@ -231,13 +232,13 @@ const gameController = (() => {
               swapPlayerTurn();
               gameBoard.updatePlayerPanels(currentPlayer);
             } else {
-              console.log('Round', rounds, 'over!');
+              console.log('Round', games, 'over!');
               callback();
             }
           });
         }
       } else {
-        console.log('Round', rounds, 'over!');
+        console.log('Round', games, 'over!');
         callback();
       }
     });
@@ -248,13 +249,15 @@ const gameController = (() => {
     gameBoard.initializeBoard();
     gameBoard.updatePlayerPanels(player1);
     await delay(500);
-    rounds += 1;
-    playOneRound(() => {
+    games += 1;
+    playOneGame(async () => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
-      console.log('in newGame, Round', rounds, 'over!');
-      if (rounds < NumOfRounds) {
+      console.log('in newGame, Round', games, 'over!');
+      if (games < NumOfGames) {
         newGame();
       } else {
+        gameBoard.updatePlayerPanels(currentPlayer);
+        await delay(100)
         alert('Game over!');
       }
     });
@@ -276,7 +279,7 @@ startBtn.addEventListener('click', (e) => {
   player1.type = 'human';
   player2.name = player2NameInputEl.value;
   player2.type = player2TypeInputEl.value;
-  NumOfRounds = numOfGamesEl.value;
+  NumOfGames = numOfGamesEl.value;
   gameSetupModal.close();
   gameController.newGame();
 });

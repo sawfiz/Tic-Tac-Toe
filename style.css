@@ -105,8 +105,6 @@ h1 {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 500px;
-    height: 300px;
     padding: 2rem;
     background-color: #fffc;
 }
@@ -117,9 +115,26 @@ h1 {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    border: 1px solid #000;
 }
 
+fieldset {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+}
+
+legend {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+button {
+    width: 80%;
+    margin: 1rem auto;
+    display: flex;
+    justify-content: center;
+}
 
 footer {
     /* color: red; */

@@ -34,23 +34,26 @@
     <dialog class="game-setup-modal">
         <div class="game-setup">
             <form action="">
-                <h3>Player 1</h3>
-                <label for="player1-name">Name</label>
-                <input type="text" name="player1-name" id="player1-name-input" value="Tom">
-                <span>Type: human</span>
-
-                <h3>Player 2</h3>
-                <label for="player2-name">Name</label>
-                <input type="text" name="player2-name" id="player2-name-input" value="Jerry">
-                <label for="player2-type">Type</label>
-                <select name="player2-type" id="player2-type-input">
-                    <option value="computer">computer</option>
-                    <option value="human">human</option>
-                </select>
-                <br>
-                <label for="number-of-games">Number of games</label>
-                <input type="number" name="number-of-games" id="number-of-games" min="3" max="10" value="5">
-                <br>
+                <fieldset>
+                    <legend>Game setup</legend>
+                    <h3>Player 1</h3>
+                    <label for="player1-name">Name</label>
+                    <input type="text" name="player1-name" id="player1-name-input" value="Tom">
+                    <p>Type: human</p>
+                    <br>
+                    <h3>Player 2</h3>
+                    <label for="player2-name">Name</label>
+                    <input type="text" name="player2-name" id="player2-name-input" value="Jerry">
+                    <label for="player2-type">Type</label>
+                    <select name="player2-type" id="player2-type-input">
+                        <option value="computer">computer</option>
+                        <option value="human">human</option>
+                    </select>
+                    <br>
+                    <label for="number-of-games">Number of games</label>
+                    <input type="number" name="number-of-games" id="number-of-games" min="3" max="10" value="5">
+                    <br>
+                </fieldset>
                 <button type="submit" id="start-game">Start Game</button>
             </form>
         </div>
