@@ -9,6 +9,8 @@
 body {
     height: 100vh;
     display: flex;
+    /* background-image: url("https://images.unsplash.com/photo-1595818919383-5f2ad76ae372?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1770&q=80"); */
+    background: #888;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
@@ -38,7 +40,7 @@ h1 {
     border-radius: 20px;
     color: white;
     margin: 30px;
-    box-shadow: 0px 0px 20px white;
+    box-shadow: 0px 0px 5px white;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -98,17 +100,27 @@ h1 {
     width: 60%;
 }
 
-dialog {
-    position: absolute;
+.game-setup-modal {
+    /* position: absolute; */
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     width: 500px;
-    height: 200px;
+    height: 300px;
     padding: 2rem;
+    background-color: #fffc;
+}
+
+.game-setup {
+    height: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid #000;
 }
 
 
 footer {
-    color: red;
+    /* color: red; */
 }
