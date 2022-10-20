@@ -108,7 +108,7 @@ const gameBoard = (() => {
     player1NameEl.innerText = player1.name;
     player2NameEl.innerText = player2.name;
     player1TypeEl.innerText = player1.type;
-    player2TypeEl.innerText = player2.type;
+    player2TypeEl.innerText = `${player2.type  } ${  player2.level}`;
     player1ScoreEl.innerText = `Wins: ${player1.score}`;
     player2ScoreEl.innerText = `Wins: ${player2.score}`;
 
@@ -146,7 +146,7 @@ const gameBoard = (() => {
 })();
 
 // Player objects
-const playerFactory = (name, type, piece, score) => {
+const playerFactory = (name, type, level, piece, score) => {
   function makeMove(callback) {
     // console.log('In player', this, name, 'Player type', this.type);
     if (this.type === 'human') {
@@ -166,10 +166,10 @@ const playerFactory = (name, type, piece, score) => {
     }
   }
 
-  return { name, type, piece, score, makeMove };
+  return { name, type, level, piece, score, makeMove };
 };
-const player1 = playerFactory('Tom', 'computer', 'X', 0);
-const player2 = playerFactory('Jerry', 'human', 'O', 0);
+const player1 = playerFactory('Tom', 'computer', 'easy', 'X', 0);
+const player2 = playerFactory('Jerry', 'human', '', 'O', 0);
 
 // gameController object using module
 const gameController = (() => {
@@ -262,6 +262,7 @@ const gameController = (() => {
         gameBoard.updatePlayerPanels(currentPlayer);
         await delay(100);
         alert('Game over!');
+        // game();
       }
     });
   }
@@ -279,7 +280,12 @@ const gameController = (() => {
       player1.name = player1NameInputEl.value;
       player1.type = 'human';
       player2.name = player2NameInputEl.value;
-      player2.type = player2TypeInputEl.value;
+      [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
+      console.log(player2TypeInputEl);
+      console.log(player2.type, player2.level);
+      console.log(player1);
+      console.log(player2);
+      
       NumOfGames = numOfGamesEl.value;
       gameSetupModal.close();
       newGame();
