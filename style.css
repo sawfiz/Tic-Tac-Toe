@@ -26,6 +26,20 @@ h1 {
     background-image: url("images/tic-tact-toe-board\ Medium.jpeg");
     background-size: cover;
     display: flex;
+    flex-direction: column;
+}
+
+.board-head {
+    flex: 1;
+    color: lightblue;
+    text-align: center;
+    font-size: 1.5rem;
+
+}
+
+.play-area {
+    flex: 90;
+    display: flex;
     justify-content: space-between;
     align-items: center;
     /* border: 1px solid red; */
@@ -98,6 +112,12 @@ h1 {
 
 .piece{
     width: 60%;
+}
+
+.board-foot {
+    flex: 1;
+    color: white;
+    text-align: center;
 }
 
 .game-setup-modal {

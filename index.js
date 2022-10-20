@@ -176,6 +176,8 @@ const gameController = (() => {
   let currentPlayer = player1;
   let games = 0;
   let plays = 0;
+  const boardHeadEl = document.querySelector('.board-head');
+  const boardFootEl = document.querySelector('.board-foot');
 
   function swapPlayerTurn() {
     currentPlayer = currentPlayer === player1 ? player2 : player1;
@@ -198,6 +200,7 @@ const gameController = (() => {
 
   function playOneGame(callback) {
     console.log('Game', games, 'starts!');
+    boardHeadEl.innerText = `Game ${games}`
 
     // This code gets executed in case computer is the frst to move
     // Then the rest of this function makes a computer move after each human move (click)
@@ -224,7 +227,7 @@ const gameController = (() => {
         // If a player is computer, the computer makes a move after each human play
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
-            await delay(500);
+            await delay(100);
             gameBoard.addToBoard(currentPlayer.piece, aiIndex);
             plays += 1;
             await delay(100);
@@ -257,7 +260,7 @@ const gameController = (() => {
         newGame();
       } else {
         gameBoard.updatePlayerPanels(currentPlayer);
-        await delay(100)
+        await delay(100);
         alert('Game over!');
       }
     });
