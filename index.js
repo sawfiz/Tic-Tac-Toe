@@ -266,25 +266,29 @@ const gameController = (() => {
     });
   }
 
-  return { newGame };
+  function game() {
+    const gameSetupModal = document.querySelector('.game-setup-modal');
+    const startBtn = document.querySelector('#start-game');
+    const player1NameInputEl = document.querySelector('#player1-name-input');
+    const player2NameInputEl = document.querySelector('#player2-name-input');
+    const player2TypeInputEl = document.querySelector('#player2-type-input');
+    const numOfGamesEl = document.querySelector('#number-of-games');
+    gameSetupModal.showModal();
+    startBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      player1.name = player1NameInputEl.value;
+      player1.type = 'human';
+      player2.name = player2NameInputEl.value;
+      player2.type = player2TypeInputEl.value;
+      NumOfGames = numOfGamesEl.value;
+      gameSetupModal.close();
+      newGame();
+    });
+  }
+
+  return { game };
 })();
 
-const gameSetupModal = document.querySelector('.game-setup-modal');
-const startBtn = document.querySelector('#start-game');
-const player1NameInputEl = document.querySelector('#player1-name-input');
-const player2NameInputEl = document.querySelector('#player2-name-input');
-const player2TypeInputEl = document.querySelector('#player2-type-input');
-const numOfGamesEl = document.querySelector('#number-of-games');
-gameSetupModal.showModal();
-startBtn.addEventListener('click', (e) => {
-  e.preventDefault();
-  player1.name = player1NameInputEl.value;
-  player1.type = 'human';
-  player2.name = player2NameInputEl.value;
-  player2.type = player2TypeInputEl.value;
-  NumOfGames = numOfGamesEl.value;
-  gameSetupModal.close();
-  gameController.newGame();
-});
+gameController.game();
 
 // TODO:
