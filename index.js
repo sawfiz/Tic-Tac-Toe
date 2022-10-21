@@ -38,22 +38,23 @@ const gameBoard = (() => {
   }
 
   // Add a play into the board array and display in browser
-  function addToBoard(piece, index) {
+  function addToBoard(marker, index) {
     // console.log('gameBoard.addToBoard', index);
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     const row = Math.floor(index / 3);
     const col = index % 3;
-    board[row][col] = piece;
+    board[row][col] = marker;
+    console.log(board);
 
-    const pieceEl = document.createElement('img');
-    pieceEl.src = piece === 'X' ? 'images/X.png' : 'images/O.png';
-    pieceEl.classList.add('piece');
+    const markerEl = document.createElement('img');
+    markerEl.src = marker === 'X' ? 'images/X.png' : 'images/O.png';
+    markerEl.classList.add('piece');
 
-    squaresEls[index].appendChild(pieceEl);
+    squaresEls[index].appendChild(markerEl);
   }
 
   // Make the board listen for human player plays
-  function getInput(piece, callback) {
+  function getInput(callback) {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls.forEach((squareEl) => {
       squareEl.addEventListener('click', () => {
@@ -77,10 +78,10 @@ const gameBoard = (() => {
     let diag2 = 0;
 
     for (let i = 0; i < boardSize; i++) {
-      if (board[i][col] === player.piece) cols++;
-      if (board[row][i] === player.piece) rows++;
-      if (board[i][i] === player.piece) diag1++;
-      if (board[i][boardSize - i - 1] === player.piece) diag2++;
+      if (board[i][col] === player.marker) cols++;
+      if (board[row][i] === player.marker) rows++;
+      if (board[i][i] === player.marker) diag1++;
+      if (board[i][boardSize - i - 1] === player.marker) diag2++;
     }
 
     if (
@@ -108,7 +109,7 @@ const gameBoard = (() => {
     player1NameEl.innerText = player1.name;
     player2NameEl.innerText = player2.name;
     player1TypeEl.innerText = player1.type;
-    player2TypeEl.innerText = `${player2.type  } ${  player2.level}`;
+    player2TypeEl.innerText = `${player2.type} ${player2.level}`;
     player1ScoreEl.innerText = `Wins: ${player1.score}`;
     player2ScoreEl.innerText = `Wins: ${player2.score}`;
 
@@ -146,29 +147,60 @@ const gameBoard = (() => {
 })();
 
 // Player objects
-const playerFactory = (name, type, level, piece, score) => {
-  function makeMove(callback) {
-    // console.log('In player', this, name, 'Player type', this.type);
-    if (this.type === 'human') {
-      gameBoard.getInput(piece, (index) => callback(index));
-    } else {
-      // Computer player
-      let index;
-      while (true) {
-        index = Math.floor(Math.random() * 9);
-        if (gameBoard.isSquareEmpty(index)) {
-          gameBoard.disableSquare(index);
-          break;
-        }
+const playerFactory = (name, type, level, marker, score) => {
+  function easyMove() {
+    // Computer player, level easy
+    let move;
+    while (true) {
+      // Loop until a valid move is found
+      move = Math.floor(Math.random() * 9);
+      // If a square is empty, play here, and disable event listener here
+      // so that a human player can no longer click on it.
+      if (gameBoard.isSquareEmpty(move)) {
+        gameBoard.disableSquare(move);
+        return move;
       }
-      console.log('Computer move', index);
-      callback(index);
     }
   }
 
-  return { name, type, level, piece, score, makeMove };
+  function minmax() {
+
+  }
+
+  function hardMove(marker) {
+    let move;
+    let bestMove = -Infinity;
+    console.log(marker);
+
+    for (let row = 0; row < boardSize; row++) {
+      for (let col = 0; col < boardSize; col++) {
+        gameBoard.board[row][col] = marker;
+        bestMove = Math.min(move, minmax());
+        gameBoard.board[row][col] = '';
+      }
+    }
+    return bestMove;
+  }
+
+  function makeMove(callback) {
+    // If human player, wait for a square to be clicked on the gameBoard
+    if (this.type === 'human') {
+      gameBoard.getInput((index) => callback(index));
+    } else if (this.level === 'easy') {
+      callback(easyMove()); // Computer makes a random move
+    } else {
+      // Computer makes a minmax move
+      console.log(this.type, this.level, this.marker);
+
+      callback(hardMove(this.marker));
+    }
+  }
+
+  return { name, type, level, marker, score, makeMove };
 };
-const player1 = playerFactory('Tom', 'computer', 'easy', 'X', 0);
+
+// Set up 2 players with default set up.  Can I move this to the gameController?
+const player1 = playerFactory('Tom', 'human', '', 'X', 0);
 const player2 = playerFactory('Jerry', 'human', '', 'O', 0);
 
 // gameController object using module
@@ -200,13 +232,13 @@ const gameController = (() => {
 
   function playOneGame(callback) {
     console.log('Game', games, 'starts!');
-    boardHeadEl.innerText = `Game ${games}`
+    boardHeadEl.innerText = `Game ${games}`;
 
     // This code gets executed in case computer is the frst to move
     // Then the rest of this function makes a computer move after each human move (click)
     if (currentPlayer.type === 'computer') {
       currentPlayer.makeMove((aiIndex) => {
-        gameBoard.addToBoard(currentPlayer.piece, aiIndex);
+        gameBoard.addToBoard(currentPlayer.marker, aiIndex);
         plays += 1;
         swapPlayerTurn();
         gameBoard.updatePlayerPanels(currentPlayer);
@@ -216,7 +248,7 @@ const gameController = (() => {
     // The code below waits for a human play (a click),
     // then followed by a computer play if there is a computer player
     currentPlayer.makeMove(async (index) => {
-      gameBoard.addToBoard(currentPlayer.piece, index);
+      gameBoard.addToBoard(currentPlayer.marker, index);
       plays += 1;
       // Wait a bit for display to finish update before decide if the game is won
       await delay(100);
@@ -228,7 +260,7 @@ const gameController = (() => {
         if (currentPlayer.type === 'computer') {
           currentPlayer.makeMove(async (aiIndex) => {
             await delay(100);
-            gameBoard.addToBoard(currentPlayer.piece, aiIndex);
+            gameBoard.addToBoard(currentPlayer.marker, aiIndex);
             plays += 1;
             await delay(100);
             if (!isRoundOver(aiIndex)) {
@@ -285,7 +317,7 @@ const gameController = (() => {
       console.log(player2.type, player2.level);
       console.log(player1);
       console.log(player2);
-      
+
       NumOfGames = numOfGamesEl.value;
       gameSetupModal.close();
       newGame();
