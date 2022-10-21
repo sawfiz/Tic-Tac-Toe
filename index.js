@@ -44,7 +44,6 @@ const gameBoard = (() => {
     const row = Math.floor(index / 3);
     const col = index % 3;
     board[row][col] = marker;
-    console.log(board);
 
     const markerEl = document.createElement('img');
     markerEl.src = marker === 'X' ? 'images/X.png' : 'images/O.png';
@@ -90,7 +89,7 @@ const gameBoard = (() => {
       diag1 === boardSize ||
       diag2 === boardSize
     ) {
-      player.score += 1;
+      player.wins += 1;
       return true;
     }
     return false;
@@ -110,8 +109,8 @@ const gameBoard = (() => {
     player2NameEl.innerText = player2.name;
     player1TypeEl.innerText = player1.type;
     player2TypeEl.innerText = `${player2.type} ${player2.level}`;
-    player1ScoreEl.innerText = `Wins: ${player1.score}`;
-    player2ScoreEl.innerText = `Wins: ${player2.score}`;
+    player1ScoreEl.innerText = `Wins: ${player1.wins}`;
+    player2ScoreEl.innerText = `Wins: ${player2.wins}`;
 
     if (currentPlayer === player1) {
       player1ContainerEl.classList.add('turn');
@@ -133,9 +132,14 @@ const gameBoard = (() => {
     squaresEls[index].style.pointerEvents = 'none';
   }
 
+  function getGameBoard() {
+    return board;
+  }
+
   // eslint-disable-next-line object-curly-newline
   return {
     board,
+    getGameBoard,
     initializeBoard,
     getInput,
     addToBoard,
@@ -147,7 +151,7 @@ const gameBoard = (() => {
 })();
 
 // Player objects
-const playerFactory = (name, type, level, marker, score) => {
+const playerFactory = (name, type, level, marker, wins) => {
   function easyMove() {
     // Computer player, level easy
     let move;
@@ -163,20 +167,29 @@ const playerFactory = (name, type, level, marker, score) => {
     }
   }
 
-  function minmax() {
+  function minmax() {}
 
-  }
-
-  function hardMove(marker) {
-    let move;
-    let bestMove = -Infinity;
+  function hardMove(mark) {
+    let bestScore = -Infinity;
+    let bestMove;
+    let board = gameBoard.getGameBoard();
     console.log(marker);
 
     for (let row = 0; row < boardSize; row++) {
       for (let col = 0; col < boardSize; col++) {
-        gameBoard.board[row][col] = marker;
-        bestMove = Math.min(move, minmax());
-        gameBoard.board[row][col] = '';
+        console.log(board);
+        
+        if (board[row][col] === '') {
+          console.log(row, col);
+          
+          board[row][col] = mark;
+          const score = 0;
+          if (score > bestScore) {
+            bestScore = score;
+            bestMove = row * boardSize + col;
+          }
+          board[row][col] = '';
+        }
       }
     }
     return bestMove;
@@ -196,7 +209,7 @@ const playerFactory = (name, type, level, marker, score) => {
     }
   }
 
-  return { name, type, level, marker, score, makeMove };
+  return { name, type, level, marker, wins, makeMove };
 };
 
 // Set up 2 players with default set up.  Can I move this to the gameController?
@@ -313,10 +326,10 @@ const gameController = (() => {
       player1.type = 'human';
       player2.name = player2NameInputEl.value;
       [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
-      console.log(player2TypeInputEl);
-      console.log(player2.type, player2.level);
-      console.log(player1);
-      console.log(player2);
+      // console.log(player2TypeInputEl);
+      // console.log(player2.type, player2.level);
+      // console.log(player1);
+      // console.log(player2);
 
       NumOfGames = numOfGamesEl.value;
       gameSetupModal.close();
