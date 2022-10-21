@@ -138,7 +138,6 @@ const gameBoard = (() => {
 
   // eslint-disable-next-line object-curly-newline
   return {
-    board,
     getGameBoard,
     initializeBoard,
     getInput,
@@ -152,6 +151,40 @@ const gameBoard = (() => {
 
 // Player objects
 const playerFactory = (name, type, level, marker, wins) => {
+  // Check if there is a winner
+  function checkWinner(board, row, col, mark) {
+    let cols = 0;
+    let rows = 0;
+    let diag1 = 0;
+    let diag2 = 0;
+
+    for (let i = 0; i < boardSize; i++) {
+      if (board[i][col] === mark) cols++;
+      if (board[row][i] === mark) rows++;
+      if (board[i][i] === mark) diag1++;
+      if (board[i][boardSize - i - 1] === mark) diag2++;
+    }
+
+    if (
+      cols === boardSize ||
+      rows === boardSize ||
+      diag1 === boardSize ||
+      diag2 === boardSize
+    ) {
+      return mark; // A winning play, return the marker of the player
+    }
+
+    let occupiedSqures = 0;
+    for (let i = 0; i < boardSize; i++) {
+      for (let j = 0; j < boardSize; j++) {
+        if (board[i][j] !== '') occupiedSqures++;
+      }
+    }
+    if (occupiedSqures === 9) return 'tie'; // The only square to play
+
+    return null; // Not a game terminating play
+  }
+
   function easyMove() {
     // Computer player, level easy
     let move;
@@ -167,26 +200,68 @@ const playerFactory = (name, type, level, marker, wins) => {
     }
   }
 
-  function minmax() {}
+  function minmax(board, mark, row, col, isMaximizing) {
+    const scores = {
+      O: 10,
+      tie: 0,
+      X: -10,
+    };
 
-  function hardMove(mark) {
+    const result = checkWinner(board, row, col, mark);
+    console.log(result);
+    if (result != null) {
+      return scores[result];
+    }
+
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          // console.log(board);
+          if (board[i][j] === '') {
+            board[i][j] = 'X';
+            const score = minmax(board, 'X', i, j, false);
+            board[i][j] = '';
+            bestScore = Math.max(score, bestScore);
+          }
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < boardSize; i++) {
+        for (let j = 0; j < boardSize; j++) {
+          // console.log(board);
+          if (board[i][j] === '') {
+            board[i][j] = 'O';
+            let score = minmax(board, 'O', i, j, true);
+            board[i][j] = '';
+            bestScore = Math.min(score, bestScore);
+          }
+        }
+      }
+      return bestScore;
+    }
+  }
+
+  function hardMove() {
     let bestScore = -Infinity;
     let move;
-    let board = gameBoard.getGameBoard();
+    const board = gameBoard.getGameBoard();
     console.log(marker);
 
     for (let row = 0; row < boardSize; row++) {
       for (let col = 0; col < boardSize; col++) {
-        console.log(board);
-        
+        // console.log(board);
         if (board[row][col] === '') {
           console.log(row, col);
+          board[row][col] = 'O';
           
-          board[row][col] = mark;
-          const score = 0;
+          const score = minmax(board, 'O', row, col, true);
           if (score > bestScore) {
-            bestScore = score;
+            bestScore = Math.max(score, bestScore);
             move = row * boardSize + col;
+
           }
           board[row][col] = '';
         }
@@ -206,7 +281,7 @@ const playerFactory = (name, type, level, marker, wins) => {
       // Computer makes a minmax move
       console.log(this.type, this.level, this.marker);
 
-      callback(hardMove(this.marker));
+      callback(hardMove());
     }
   }
 
