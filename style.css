@@ -16,10 +16,6 @@ body {
     align-items: center;
 }
 
-h1 {
-    /* grid-area: head; */
-}
-
 .board-container {
     width: 1200px;
     height: 675px;
@@ -154,8 +150,4 @@ button {
     margin: 1rem auto;
     display: flex;
     justify-content: center;
-}
-
-footer {
-    /* color: red; */
 }

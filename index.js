@@ -160,7 +160,6 @@ const playerFactory = (name, type, level, marker, wins) => {
   }
 
   function checkWinner(board) {
-    let winner = null;
     // Check rows
     for (let i = 0; i < BoardSize; i++) {
       if (equals3(board[i][0], board[i][1], board[i][2])) {
@@ -253,16 +252,13 @@ const playerFactory = (name, type, level, marker, wins) => {
     let bestScore = -Infinity;
     let bestMove;
     const board = gameBoard.getGameBoard();
-    console.log(marker);
 
     for (let row = 0; row < BoardSize; row++) {
       for (let col = 0; col < BoardSize; col++) {
         // console.log(board);
         if (board[row][col] === '') {
-          console.log(row, col);
           board[row][col] = 'O';
           const score = minimax(board, false);
-          console.log('score:', score, 'bestScore:', bestScore);
           if (score > bestScore) {
             bestScore = score;
             bestMove = row * BoardSize + col;
@@ -282,8 +278,7 @@ const playerFactory = (name, type, level, marker, wins) => {
     } else if (this.level === 'easy') {
       callback(easyMove()); // Computer makes a random move
     } else {
-      // Computer makes a minmax move
-      console.log(this.type, this.level, this.marker);
+      // Computer makes a minimax move
       callback(hardMove());
     }
   }
@@ -300,7 +295,9 @@ const gameController = (() => {
   let numOfGames;
   let currentPlayer = player1;
   let games = 0;
+  let ties = 0;
   let plays = 0;
+
   const boardHeadEl = document.querySelector('.board-head');
   const boardFootEl = document.querySelector('.board-foot');
 
@@ -315,6 +312,8 @@ const gameController = (() => {
       return true;
     }
     if (plays >= BoardSize * BoardSize) {
+      ties++;
+      boardFootEl.innerText = `Ties: ${ties}`;
       alert('Tie!');
       // In case of a tie game, the player to play first in the next round is
       // the second to go in this round, as there are 9 moves in a round.
@@ -324,7 +323,6 @@ const gameController = (() => {
   }
 
   function playOneGame(callback) {
-    console.log('Game', games, 'starts!');
     boardHeadEl.innerText = `Game ${games}`;
 
     // This code gets executed in case computer is the frst to move
@@ -360,13 +358,11 @@ const gameController = (() => {
               swapPlayerTurn();
               gameBoard.updatePlayerPanels(currentPlayer);
             } else {
-              console.log('Round', games, 'over!');
               callback();
             }
           });
         }
       } else {
-        console.log('Round', games, 'over!');
         callback();
       }
     });
@@ -380,7 +376,6 @@ const gameController = (() => {
     games += 1;
     playOneGame(async () => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
-      console.log('in newGame, Round', games, 'over!');
       if (games < numOfGames) {
         newGame();
       } else {
