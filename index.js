@@ -152,26 +152,68 @@ const gameBoard = (() => {
 // Player objects
 const playerFactory = (name, type, level, marker, wins) => {
   // Check if there is a winner
-  function checkWinner(board, row, col, mark) {
-    let cols = 0;
-    let rows = 0;
-    let diag1 = 0;
-    let diag2 = 0;
+  // function checkWinner(board, mark, row, col) {
+  //   let cols = 0;
+  //   let rows = 0;
+  //   let diag1 = 0;
+  //   let diag2 = 0;
 
+  //   for (let i = 0; i < boardSize; i++) {
+  //     if (board[i][col] === mark) cols++;
+  //     if (board[row][i] === mark) rows++;
+  //     if (board[i][i] === mark) diag1++;
+  //     if (board[i][boardSize - i - 1] === mark) diag2++;
+  //   }
+
+  //   if (
+  //     cols === boardSize ||
+  //     rows === boardSize ||
+  //     diag1 === boardSize ||
+  //     diag2 === boardSize
+  //   ) {
+  //     return mark; // A winning play, return the marker of the player
+  //   }
+
+  //   let occupiedSqures = 0;
+  //   for (let i = 0; i < boardSize; i++) {
+  //     for (let j = 0; j < boardSize; j++) {
+  //       if (board[i][j] !== '') occupiedSqures++;
+  //     }
+  //   }
+  //   if (occupiedSqures === 9) return 'tie'; // The only square to play
+
+  //   return null; // Not a game terminating play
+  // }
+  function equals3(a, b, c) {
+    return a === b && a === c && a !== '';
+  }
+
+  function checkWinner(board) {
+    let winner = null;
+
+    // Check rows
     for (let i = 0; i < boardSize; i++) {
-      if (board[i][col] === mark) cols++;
-      if (board[row][i] === mark) rows++;
-      if (board[i][i] === mark) diag1++;
-      if (board[i][boardSize - i - 1] === mark) diag2++;
+      if (equals3(board[i][0], board[i][1], board[i][2])) {
+        winner = board[i][0];
+        return winner;
+      }
     }
-
-    if (
-      cols === boardSize ||
-      rows === boardSize ||
-      diag1 === boardSize ||
-      diag2 === boardSize
-    ) {
-      return mark; // A winning play, return the marker of the player
+    // Check columns
+    for (let i = 0; i < boardSize; i++) {
+      if (equals3(board[0][i], board[1][i], board[2][i])) {
+        winner = board[0][i];
+        return winner;
+      }
+    }
+    // Check diagnal
+    if (equals3(board[0][0], board[1][1], board[2][2])) {
+      winner = board[1][1];
+      return winner;
+    }
+    // Check the other diagnal
+    if (equals3(board[0][2], board[1][1], board[2][0])) {
+      winner = board[1][1];
+      return winner;
     }
 
     let occupiedSqures = 0;
@@ -181,7 +223,6 @@ const playerFactory = (name, type, level, marker, wins) => {
       }
     }
     if (occupiedSqures === 9) return 'tie'; // The only square to play
-
     return null; // Not a game terminating play
   }
 
@@ -200,16 +241,15 @@ const playerFactory = (name, type, level, marker, wins) => {
     }
   }
 
-  function minmax(board, mark, row, col, isMaximizing) {
+  function minmax(board, isMaximizing) {
     const scores = {
       O: 10,
       tie: 0,
       X: -10,
     };
 
-    const result = checkWinner(board, row, col, mark);
-    console.log(result);
-    if (result != null) {
+    const result = checkWinner(board);
+    if (result !== null) {
       return scores[result];
     }
 
@@ -220,13 +260,14 @@ const playerFactory = (name, type, level, marker, wins) => {
           // console.log(board);
           if (board[i][j] === '') {
             board[i][j] = 'X';
-            const score = minmax(board, 'X', i, j, false);
+            const score = minmax(board, false);
             board[i][j] = '';
             bestScore = Math.max(score, bestScore);
           }
         }
       }
       return bestScore;
+      // eslint-disable-next-line no-else-return
     } else {
       let bestScore = Infinity;
       for (let i = 0; i < boardSize; i++) {
@@ -234,7 +275,7 @@ const playerFactory = (name, type, level, marker, wins) => {
           // console.log(board);
           if (board[i][j] === '') {
             board[i][j] = 'O';
-            let score = minmax(board, 'O', i, j, true);
+            const score = minmax(board, true);
             board[i][j] = '';
             bestScore = Math.min(score, bestScore);
           }
@@ -246,7 +287,7 @@ const playerFactory = (name, type, level, marker, wins) => {
 
   function hardMove() {
     let bestScore = -Infinity;
-    let move;
+    let bestMove;
     const board = gameBoard.getGameBoard();
     console.log(marker);
 
@@ -256,19 +297,18 @@ const playerFactory = (name, type, level, marker, wins) => {
         if (board[row][col] === '') {
           console.log(row, col);
           board[row][col] = 'O';
-          
-          const score = minmax(board, 'O', row, col, true);
+          const score = minmax(board, true);
+          console.log('score:', score, 'bestScore:', bestScore);
           if (score > bestScore) {
-            bestScore = Math.max(score, bestScore);
-            move = row * boardSize + col;
-
+            bestScore = score;
+            bestMove = row * boardSize + col;
           }
           board[row][col] = '';
         }
       }
     }
-    gameBoard.disableSquare(move);
-    return move;
+    gameBoard.disableSquare(bestMove);
+    return bestMove;
   }
 
   function makeMove(callback) {
@@ -280,7 +320,6 @@ const playerFactory = (name, type, level, marker, wins) => {
     } else {
       // Computer makes a minmax move
       console.log(this.type, this.level, this.marker);
-
       callback(hardMove());
     }
   }
