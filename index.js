@@ -171,7 +171,7 @@ const playerFactory = (name, type, level, marker, wins) => {
 
   function hardMove(mark) {
     let bestScore = -Infinity;
-    let bestMove;
+    let move;
     let board = gameBoard.getGameBoard();
     console.log(marker);
 
@@ -186,13 +186,14 @@ const playerFactory = (name, type, level, marker, wins) => {
           const score = 0;
           if (score > bestScore) {
             bestScore = score;
-            bestMove = row * boardSize + col;
+            move = row * boardSize + col;
           }
           board[row][col] = '';
         }
       }
     }
-    return bestMove;
+    gameBoard.disableSquare(move);
+    return move;
   }
 
   function makeMove(callback) {
