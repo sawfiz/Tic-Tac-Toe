@@ -400,6 +400,7 @@ const gameController = (() => {
       player1.type = 'human';
       player2.name = player2NameInputEl.value;
       [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
+      if (player2.type === 'human') player2.level = ''
       numOfGames = numOfGamesEl.value;
       gameSetupModal.close();
       newGame();
