@@ -4,10 +4,11 @@
 /* eslint-disable comma-dangle */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
-const boardEl = document.querySelector('.board');
-const boardSize = 3;
-let NumOfGames = 3;
 
+// Global constant
+const BoardSize = 3;
+
+// Global function
 function delay(time) {
   // eslint-disable-next-line no-promise-executor-return
   return new Promise((resolve) => setTimeout(resolve, time));
@@ -18,18 +19,18 @@ const gameBoard = (() => {
   let board = [];
 
   function initializeBoard() {
+    const boardEl = document.querySelector('.board');
     // Reset the board array
     board = [
       ['', '', ''],
       ['', '', ''],
       ['', '', ''],
     ];
-    // console.log('Intiialize', JSON.parse(JSON.stringify(board)));
 
-    // Empty the board display
+    // Empty the board display, add empty squares
     boardEl.innerHTML = '';
-    for (let row = 0; row < boardSize; row++) {
-      for (let col = 0; col < boardSize; col++) {
+    for (let row = 0; row < BoardSize; row++) {
+      for (let col = 0; col < BoardSize; col++) {
         const squareEl = document.createElement('div');
         squareEl.classList.add('square');
         boardEl.appendChild(squareEl);
@@ -39,7 +40,6 @@ const gameBoard = (() => {
 
   // Add a play into the board array and display in browser
   function addToBoard(marker, index) {
-    // console.log('gameBoard.addToBoard', index);
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     const row = Math.floor(index / 3);
     const col = index % 3;
@@ -58,15 +58,15 @@ const gameBoard = (() => {
     squaresEls.forEach((squareEl) => {
       squareEl.addEventListener('click', () => {
         // Disable a square from being clicked on again
+        // TODO: there is also a way to allow a listen fire only once
         squareEl.style.pointerEvents = 'none';
         const index = squaresEls.indexOf(squareEl);
-        // console.log('gameBoard.getInput(callback)', index);
         callback(index);
       });
     });
   }
 
-  // Check if there is a winner
+  // Check if a player's move is a winning play
   function isWinner(player, index) {
     const row = Math.floor(index / 3);
     const col = index % 3;
@@ -76,18 +76,18 @@ const gameBoard = (() => {
     let diag1 = 0;
     let diag2 = 0;
 
-    for (let i = 0; i < boardSize; i++) {
+    for (let i = 0; i < BoardSize; i++) {
       if (board[i][col] === player.marker) cols++;
       if (board[row][i] === player.marker) rows++;
       if (board[i][i] === player.marker) diag1++;
-      if (board[i][boardSize - i - 1] === player.marker) diag2++;
+      if (board[i][BoardSize - i - 1] === player.marker) diag2++;
     }
 
     if (
-      cols === boardSize ||
-      rows === boardSize ||
-      diag1 === boardSize ||
-      diag2 === boardSize
+      cols === BoardSize ||
+      rows === BoardSize ||
+      diag1 === BoardSize ||
+      diag2 === BoardSize
     ) {
       player.wins += 1;
       return true;
@@ -121,17 +121,20 @@ const gameBoard = (() => {
     }
   }
 
+  // Check if a square is empty
   function isSquareEmpty(index) {
     const row = Math.floor(index / 3);
     const col = index % 3;
     return board[row][col] === '';
   }
 
+  // Disable a particular square on the board from human player clicking
   function disableSquare(index) {
     const squaresEls = Array.from(document.querySelectorAll('.square'));
     squaresEls[index].style.pointerEvents = 'none';
   }
 
+  // Getter function for the board array
   function getGameBoard() {
     return board;
   }
@@ -151,6 +154,7 @@ const gameBoard = (() => {
 
 // Player objects
 const playerFactory = (name, type, level, marker, wins) => {
+  // Utility function for comparing if 3 cells are non-empty and equal
   function equals3(a, b, c) {
     return a === b && a === c && a !== '';
   }
@@ -158,33 +162,29 @@ const playerFactory = (name, type, level, marker, wins) => {
   function checkWinner(board) {
     let winner = null;
     // Check rows
-    for (let i = 0; i < boardSize; i++) {
+    for (let i = 0; i < BoardSize; i++) {
       if (equals3(board[i][0], board[i][1], board[i][2])) {
-        winner = board[i][0];
-        return winner;
+        return board[i][0];
       }
     }
     // Check columns
-    for (let i = 0; i < boardSize; i++) {
+    for (let i = 0; i < BoardSize; i++) {
       if (equals3(board[0][i], board[1][i], board[2][i])) {
-        winner = board[0][i];
-        return winner;
+        return board[0][i];
       }
     }
     // Check diagnal
     if (equals3(board[0][0], board[1][1], board[2][2])) {
-      winner = board[1][1];
-      return winner;
+      return board[1][1];
     }
     // Check the other diagnal
     if (equals3(board[0][2], board[1][1], board[2][0])) {
-      winner = board[1][1];
-      return winner;
+      return board[1][1];
     }
     // Check for tie
     let occupiedSqures = 0;
-    for (let i = 0; i < boardSize; i++) {
-      for (let j = 0; j < boardSize; j++) {
+    for (let i = 0; i < BoardSize; i++) {
+      for (let j = 0; j < BoardSize; j++) {
         if (board[i][j] !== '') occupiedSqures++;
       }
     }
@@ -207,7 +207,7 @@ const playerFactory = (name, type, level, marker, wins) => {
     }
   }
 
-  function minmax(board, isMaximizing) {
+  function minimax(board, isMaximizing) {
     const scores = {
       O: 10,
       tie: 0,
@@ -221,11 +221,11 @@ const playerFactory = (name, type, level, marker, wins) => {
 
     if (isMaximizing) {
       let bestScore = -Infinity;
-      for (let i = 0; i < boardSize; i++) {
-        for (let j = 0; j < boardSize; j++) {
+      for (let i = 0; i < BoardSize; i++) {
+        for (let j = 0; j < BoardSize; j++) {
           if (board[i][j] === '') {
             board[i][j] = 'O';
-            const score = minmax(board, false);
+            const score = minimax(board, false);
             bestScore = Math.max(score, bestScore);
             board[i][j] = '';
           }
@@ -235,11 +235,11 @@ const playerFactory = (name, type, level, marker, wins) => {
       // eslint-disable-next-line no-else-return
     } else {
       let bestScore = Infinity;
-      for (let i = 0; i < boardSize; i++) {
-        for (let j = 0; j < boardSize; j++) {
+      for (let i = 0; i < BoardSize; i++) {
+        for (let j = 0; j < BoardSize; j++) {
           if (board[i][j] === '') {
             board[i][j] = 'X';
-            const score = minmax(board, true);
+            const score = minimax(board, true);
             bestScore = Math.min(score, bestScore);
             board[i][j] = '';
           }
@@ -255,17 +255,17 @@ const playerFactory = (name, type, level, marker, wins) => {
     const board = gameBoard.getGameBoard();
     console.log(marker);
 
-    for (let row = 0; row < boardSize; row++) {
-      for (let col = 0; col < boardSize; col++) {
+    for (let row = 0; row < BoardSize; row++) {
+      for (let col = 0; col < BoardSize; col++) {
         // console.log(board);
         if (board[row][col] === '') {
           console.log(row, col);
           board[row][col] = 'O';
-          const score = minmax(board, false);
+          const score = minimax(board, false);
           console.log('score:', score, 'bestScore:', bestScore);
           if (score > bestScore) {
             bestScore = score;
-            bestMove = row * boardSize + col;
+            bestMove = row * BoardSize + col;
           }
           board[row][col] = '';
         }
@@ -297,6 +297,7 @@ const player2 = playerFactory('Jerry', 'human', '', 'O', 0);
 
 // gameController object using module
 const gameController = (() => {
+  let numOfGames;
   let currentPlayer = player1;
   let games = 0;
   let plays = 0;
@@ -313,7 +314,7 @@ const gameController = (() => {
       swapPlayerTurn(); // Make the loser go first next round.
       return true;
     }
-    if (plays >= boardSize * boardSize) {
+    if (plays >= BoardSize * BoardSize) {
       alert('Tie!');
       // In case of a tie game, the player to play first in the next round is
       // the second to go in this round, as there are 9 moves in a round.
@@ -380,13 +381,12 @@ const gameController = (() => {
     playOneGame(async () => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
       console.log('in newGame, Round', games, 'over!');
-      if (games < NumOfGames) {
+      if (games < numOfGames) {
         newGame();
       } else {
         gameBoard.updatePlayerPanels(currentPlayer);
         await delay(100);
         alert('Game over!');
-        // game();
       }
     });
   }
@@ -405,12 +405,7 @@ const gameController = (() => {
       player1.type = 'human';
       player2.name = player2NameInputEl.value;
       [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
-      // console.log(player2TypeInputEl);
-      // console.log(player2.type, player2.level);
-      // console.log(player1);
-      // console.log(player2);
-
-      NumOfGames = numOfGamesEl.value;
+      numOfGames = numOfGamesEl.value;
       gameSetupModal.close();
       newGame();
     });
