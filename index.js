@@ -134,6 +134,14 @@ const gameBoard = (() => {
     squaresEls[index].style.pointerEvents = 'none';
   }
 
+  // Disable all squares on the board from human player clicking
+  function disableAllSquares() {
+    const squaresEls = Array.from(document.querySelectorAll('.square'));
+    squaresEls.forEach((squareEl) => {
+      squareEl.style.pointerEvents = 'none';
+    });
+  }
+
   // Getter function for the board array
   function getGameBoard() {
     return board;
@@ -149,6 +157,7 @@ const gameBoard = (() => {
     updatePlayerPanels,
     isSquareEmpty,
     disableSquare,
+    disableAllSquares,
   };
 })();
 
@@ -293,8 +302,8 @@ const player2 = playerFactory('Jerry', 'human', '', 'O', 0);
 // gameController object using module
 const gameController = (() => {
   let numOfGames;
-  let currentPlayer = player1;
   let games = 0;
+  let currentPlayer = player1;
   let ties = 0;
   let plays = 0;
 
@@ -335,10 +344,10 @@ const gameController = (() => {
   }
 
   function playOneGame(callback) {
-    boardHeadEl.innerText = `Game ${games}`;
-
     // This code gets executed in case computer is the frst to move
     // Then the rest of this function makes a computer move after each human move (click)
+    gameBoard.initializeBoard();
+    gameBoard.updatePlayerPanels(currentPlayer);
     if (currentPlayer.type === 'computer') {
       currentPlayer.makeMove((aiIndex) => {
         gameBoard.addToBoard(currentPlayer.marker, aiIndex);
@@ -369,32 +378,31 @@ const gameController = (() => {
             if (!isRoundOver(aiIndex)) {
               swapPlayerTurn();
               gameBoard.updatePlayerPanels(currentPlayer);
-            } else {
-              callback();
-            }
+            } else callback();
           });
         }
-      } else {
-        callback();
-      }
+      } else callback();
     });
   }
 
   // Play a number of games in sequence
-  async function newGame() {
-    gameBoard.initializeBoard();
-    gameBoard.updatePlayerPanels(player1);
-    await delay(500);
+  async function playSomeGames(callback) {
     games += 1;
+    console.log(`Game ${games}`);
+    if (games > numOfGames) callback();
+    boardHeadEl.innerText = `Game ${games}`;
     playOneGame(async () => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
       if (games < numOfGames) {
         await delay(1000);
-        newGame();
+        playSomeGames(() => {
+          callback();
+        });
       } else {
         gameBoard.updatePlayerPanels(currentPlayer);
+        gameBoard.disableAllSquares();
         await delay(100);
-        alert('Game over!');
+        callback();
       }
     });
   }
@@ -406,6 +414,9 @@ const gameController = (() => {
     const player2NameInputEl = document.querySelector('#player2-name-input');
     const player2TypeInputEl = document.querySelector('#player2-type-input');
     const numOfGamesEl = document.querySelector('#number-of-games');
+    const gameOverModal = document.querySelector('.game-over-modal');
+    const restartBtn = document.querySelector('#restart-game');
+
     gameSetupModal.showModal();
     startBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -415,8 +426,19 @@ const gameController = (() => {
       [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
       if (player2.type === 'human') player2.level = '';
       numOfGames = numOfGamesEl.value;
+      games = 0;
+      player1.wins = 0;
+      player2.wins = 0;
       gameSetupModal.close();
-      newGame();
+
+      playSomeGames(() => {
+        gameOverModal.showModal();
+        restartBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          gameOverModal.close();
+          game();
+        });
+      });
     });
   }
 

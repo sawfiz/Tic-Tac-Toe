@@ -166,7 +166,7 @@ button {
     text-shadow: 0 0 4px black;
 }
 
-.game-over {
+.game-over-modal {
     position: absolute;
     top: 50%;
     left: 50%;
