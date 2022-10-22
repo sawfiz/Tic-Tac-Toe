@@ -306,18 +306,30 @@ const gameController = (() => {
   }
 
   function isRoundOver(index) {
+    const gameMsgEl = document.querySelector('.game-message');
     if (gameBoard.isWinner(currentPlayer, index)) {
-      alert(`${currentPlayer.name} won!`);
-      swapPlayerTurn(); // Make the loser go first next round.
+      gameMsgEl.innerText = `${currentPlayer.name} won!`;
+
+      gameMsgEl.showModal();
+      setTimeout(() => {
+        gameMsgEl.close();
+      }, 1000);
+
+      swapPlayerTurn();
       return true;
     }
     if (plays >= BoardSize * BoardSize) {
       ties++;
       boardFootEl.innerText = `Ties: ${ties}`;
-      alert('Tie!');
+      gameMsgEl.innerText = 'Tie!';
+      gameMsgEl.showModal();
+      setTimeout(() => {
+        gameMsgEl.close();
+      }, 1000);
+      swapPlayerTurn();
+      return true;
       // In case of a tie game, the player to play first in the next round is
       // the second to go in this round, as there are 9 moves in a round.
-      return true;
     }
     return false;
   }
@@ -377,6 +389,7 @@ const gameController = (() => {
     playOneGame(async () => {
       plays = 0; // I do not like this, plays = 0 should be set in playOneRound()
       if (games < numOfGames) {
+        await delay(1000);
         newGame();
       } else {
         gameBoard.updatePlayerPanels(currentPlayer);
@@ -400,7 +413,7 @@ const gameController = (() => {
       player1.type = 'human';
       player2.name = player2NameInputEl.value;
       [player2.type, player2.level] = player2TypeInputEl.value.split(/\s+/);
-      if (player2.type === 'human') player2.level = ''
+      if (player2.type === 'human') player2.level = '';
       numOfGames = numOfGamesEl.value;
       gameSetupModal.close();
       newGame();
