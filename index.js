@@ -409,11 +409,12 @@ const gameController = (() => {
 
   function game() {
     const gameSetupModal = document.querySelector('.game-setup-modal');
-    const startBtn = document.querySelector('#start-game');
     const player1NameInputEl = document.querySelector('#player1-name-input');
     const player2NameInputEl = document.querySelector('#player2-name-input');
     const player2TypeInputEl = document.querySelector('#player2-type-input');
     const numOfGamesEl = document.querySelector('#number-of-games');
+    const startBtn = document.querySelector('#start-game');
+
     const gameOverModal = document.querySelector('.game-over-modal');
     const restartBtn = document.querySelector('#restart-game');
 
@@ -429,6 +430,8 @@ const gameController = (() => {
       games = 0;
       player1.wins = 0;
       player2.wins = 0;
+      ties = 0;
+      boardFootEl.innerText = 'Ties: 0';
       gameSetupModal.close();
 
       playSomeGames(() => {
