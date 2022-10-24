@@ -439,15 +439,14 @@ const gameController = (() => {
         restartBtn.addEventListener('click', (event) => {
           event.preventDefault();
           gameOverModal.close();
-          game();
+          // game();
+          window.location.reload();
         });
       });
     });
   }
 
+  game();
+
   return { game };
 })();
-
-gameController.game();
-
-// TODO:

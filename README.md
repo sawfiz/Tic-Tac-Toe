@@ -3,25 +3,24 @@ A project from the Javascript course, the Odin Project
 # Library
 [Project: Tic-Tac-Toe](https://www.theodinproject.com/lessons/node-path-javascript-tic-tac-toe) from the [Javascript Course](https://www.theodinproject.com/paths/full-stack-javascript/courses/javascript), [the Odin Project](https://www.theodinproject.com/)
 
-## To-do
-  - 
+## Introduction
+  - A classic school yard game.  Two players take turns to mark a square on a 3x3 board.  Whichever player first gets 3 markers in a row wins.
+  - The game starts with a game setup popup where a player can 
+    - pick an oppoent.  The options are:
+      - a human player
+      - a computer player that makes random plays
+      - a computer player that uses the minimax algorithm to be unbeatable
+    - pick number of games to play.
+      - Each player's wins and the ties are tracked
+  - When all the games are played, a popup shows up and allows the player to restart.
 
 ## Key new concepts used
 - Assets
-  - Preview on Mac can be used to make parts of a png file transparent
-
-  
-- HTML
-
-
-- CSS
-  - I really like the way WDS implmented Tic Tac Toe, where there is a preview of the X or O in a square before making a play.  I need to figure out how to do this for this project.
-  - [Build Tic Tac Toe With JavaScript - Tutorial](https://www.youtube.com/watch?v=Y-GkMjUZsmM&t=945s)
-
+  - The built-in Preview app on Mac can be used to make parts of a png file transparent
   
 - Javascript
   - Callback functions
-    - There is a massive use of callback functions in this project, as many things are waiting for a previous happen before moving on.  
+    - I made massive use of callback functions in this project, as many things are waiting for a previous event to complete before moving on.  e.g. waiting for a player move, waiting for a game to finish before starting a new one, waiting for all games to finish before showing a Game Over popup.
     - A very good video tutorial from ColorCode [Async JavaScript & Callback Functions -- Tutorial for Beginners](https://www.youtube.com/watch?v=QSqc6MMS6Fk&list=PL1PqvM2UQiMoGNTaxFMSK2cih633lpFKP&index=11)
   - Factory functions
     - if you need multiples of something, create them with factories
@@ -69,17 +68,33 @@ A project from the Javascript course, the Odin Project
         - a loser of a game goes first in the next game
         - in a tied game, the player to make the first move is naturally the alternative player
 
-  - minmax alghorithm
+  - minimax alghorithm
     - [Tic Tac Toe: Understanding the Minimax Algorithm](https://www.neverstopbuilding.com/blog/minimax)
     - [Coding Challenge 154: Tic Tac Toe AI with Minimax Algorithm](https://www.youtube.com/watch?v=trKjYdBASyQ&t=151s)
+
   - Misc
     - Use `let` to declare an array if I want to reassign it's value, instead of `const`
     - Use `console.log(JSON.parse( JSON.stringify( board ) ))` to show array content, otherwise the console re-evaluates it's content at the time of clicking on the triangle
     - `removeEventListener()`, but I did not use it.  It was more effective to use `squareEl.style.pointerEvents = 'none';`
+    - There is also a way to tell the eventlistener to fire only once with {once}
   - An interesting way to reduce querySelectors
     - `const el = (selector) => document.querySelector(selector);` 
     - `const board = el(".board");`
 
 # Resources
-- [Build a popup using Javascript](https://www.youtube.com/watch?v=MBaw_6cPmAw)  by WDS
-- [Modal made easy - dialog = the easiest way to make a popup modal](https://www.youtube.com/watch?v=TAB_v6yBXIE) by Kevin Powell
+
+
+# Outstanding issues
+- I used a lot of callbacks, I wonder if it is all necessary, given that callbacks has not been covered specifically at this point of the course
+- The code in gameController() to run a number of games feels very clunky to me.  I wonder how it can be optimized.
+- Restart works, but it results in a console error on the second restart.  I think it is because I am calling game() recursively.  I will need to find a solution for it.
+  -- One option is to use `window.location.reload()` to force a reload of the page.  But this seem very brutal forced.
+
+# Ideas for future improvements
+  - I really like the way WDS implmented Tic Tac Toe [Build Tic Tac Toe With JavaScript - Tutorial](https://www.youtube.com/watch?v=Y-GkMjUZsmM&t=945s), where there is a preview of the X or O in a square before making a play.  I need to figure out how to do this for this project.
+    - Kyle made the X and O markers using CSS ::before and ::after pseudo elements.
+    - I use pngs for the marks
+  - Minimax
+    - Optimize the minimax() algorithm.  There seem to be a lot of repeated code.
+    - I can implement using depth as a way to optimize computer move.  Although there are cases where this can be benefitial, I can not identify a specific case at the moment, so I won't know if the algorithm works.
+    - There is also Alpha-pruning to improve efficiency, but I will leave it for later...
